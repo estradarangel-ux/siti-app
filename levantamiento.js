@@ -389,18 +389,42 @@ function removeSurveyStorage(id){
 }
 
 /* ---- Directorio de empresas (autocompletado de datos de contacto) ----
-   Se guarda por dispositivo. Al escribir un cliente ya conocido, rellena los
-   campos de contacto vacíos para no volver a capturarlos. */
+   En backend 'firebase' el catálogo es COMPARTIDO por todo el equipo (colección
+   'empresas' en Firestore). En 'local'/'claude' se guarda en el dispositivo.
+   Al escribir un cliente ya conocido, rellena los campos de contacto vacíos. */
 var EMPRESA_AUTOFILL_FIELDS = ['contacto','telefono','email','direccion'];
 function empresaKey(name){ return (name||'').trim().toLowerCase(); }
+// ID de documento seguro en Firestore (sin caracteres no permitidos).
+function empresaDocId(name){
+  return (empresaKey(name).replace(/[\/\\.#$\[\]]+/g,'_') || '_').slice(0,1400);
+}
 function refreshEmpresasNames(){
   empresasNames = Object.keys(empresasDir).map(function(k){ return empresasDir[k].cliente; })
     .filter(Boolean).sort(function(a,b){ return a.localeCompare(b,'es'); });
 }
+function loadEmpresasFirebase(){
+  return fbDb.collection('empresas').get().then(function(snap){
+    var dir = {};
+    snap.forEach(function(doc){
+      var d = doc.data(); var name = d.cliente || '';
+      if(!name) return;
+      var rec = {cliente: name};
+      EMPRESA_AUTOFILL_FIELDS.forEach(function(k){ if(d[k]) rec[k] = d[k]; });
+      dir[empresaKey(name)] = rec;
+    });
+    empresasDir = dir;
+  }).catch(function(){ /* si las reglas lo bloquean, queda vacío */ });
+}
 function loadEmpresas(){
-  return storageGet('empresas-dir').then(function(v){
-    empresasDir = v ? (JSON.parse(v) || {}) : {};
-  }).catch(function(){ empresasDir = {}; }).then(function(){ refreshEmpresasNames(); });
+  var p;
+  if(backend==='firebase' && fbDb){
+    p = loadEmpresasFirebase();
+  } else {
+    p = storageGet('empresas-dir').then(function(v){
+      empresasDir = v ? (JSON.parse(v) || {}) : {};
+    }).catch(function(){ empresasDir = {}; });
+  }
+  return p.then(function(){ refreshEmpresasNames(); });
 }
 function upsertEmpresa(general){
   var name = (general.cliente||'').trim();
@@ -409,6 +433,12 @@ function upsertEmpresa(general){
   EMPRESA_AUTOFILL_FIELDS.forEach(function(k){ if(general[k]) rec[k] = general[k]; });
   empresasDir[empresaKey(name)] = rec;
   refreshEmpresasNames();
+  if(backend==='firebase' && fbDb){
+    var doc = Object.assign({key: empresaKey(name), updatedAt: Date.now()}, rec);
+    if(currentUser && currentUser.email) doc.updatedBy = currentUser.email;
+    // merge:true acumula datos conocidos y nunca borra un contacto con un vacío.
+    return fbDb.collection('empresas').doc(empresaDocId(name)).set(doc, {merge:true}).catch(function(){});
+  }
   return storageSet('empresas-dir', JSON.stringify(empresasDir)).catch(function(){});
 }
 // Rellena los campos de contacto vacíos con los de la empresa conocida.
@@ -533,6 +563,9 @@ function startFirebaseAuthListener(){
         allUsersCache = null;
         adminFilterOwnerId = 'ALL';
         renderUserbar();
+        // Carga el catálogo de empresas compartido (Firestore); si un formulario
+        // ya está abierto, refresca su lista al terminar.
+        loadEmpresas().then(function(){ if(view==='form') renderForm(); });
         goList();
         broadcastAuth();
       }).catch(function(){
@@ -1680,12 +1713,11 @@ var noteEl = document.getElementById('siti-storage-note');
 var STORAGE_NOTE_TEXT = 'La información queda guardada en el sistema.';
 function setStorageNote(text){ if(noteEl) noteEl.textContent = text; }
 
-loadEmpresas();
-
 if(hasClaudeStorage()){
   backend = 'claude';
   setStorageNote(STORAGE_NOTE_TEXT);
   currentUser = {uid:'preview', email:'vista previa', role:'admin', disabled:false};
+  loadEmpresas();
   goList();
   broadcastAuth();
 } else if(isFirebaseConfigured()){
@@ -1700,6 +1732,7 @@ if(hasClaudeStorage()){
   backend = 'local';
   setStorageNote(STORAGE_NOTE_TEXT);
   currentUser = {uid:'local', email:'este dispositivo', role:'admin', disabled:false};
+  loadEmpresas();
   goList();
   broadcastAuth();
 }
