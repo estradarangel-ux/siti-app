@@ -60,7 +60,7 @@ var CABLE_TIPOS_COBRE = ['STP Cat 5e','STP Cat 6','STP Cat 6A','UTP Cat 5e','UTP
 var CABLE_MARCAS = ['Panduit','Netkey','Otro'];
 
 var GENERAL_FIELDS = [
-  {key:'cliente', label:'Cliente / Empresa', type:'text', pairWithNext:true, autocompleteEmpresa:true, triggersRerender:true},
+  {key:'cliente', label:'Cliente / Empresa (busca o escribe una nueva)', type:'text', pairWithNext:true, autocompleteEmpresa:true},
   {key:'contacto', label:'Nombre de contacto', type:'text'},
   {key:'proyecto', label:'Proyecto', type:'text', pairWithNext:true},
   {key:'sucursal', label:'Sucursal', type:'text'},
@@ -412,14 +412,36 @@ function upsertEmpresa(general){
   return storageSet('empresas-dir', JSON.stringify(empresasDir)).catch(function(){});
 }
 // Rellena los campos de contacto vacíos con los de la empresa conocida.
+// Devuelve la lista de campos que se autocompletaron (para reflejarlos en el DOM
+// sin re-renderizar el formulario, y no perder el cursor).
 function autofillEmpresa(name){
   var rec = empresasDir[empresaKey(name)];
-  if(!rec) return false;
-  var changed = false;
+  if(!rec) return [];
+  var changed = [];
   EMPRESA_AUTOFILL_FIELDS.forEach(function(k){
-    if(!current.general[k] && rec[k]){ current.general[k] = rec[k]; changed = true; }
+    if(!current.general[k] && rec[k]){ current.general[k] = rec[k]; changed.push(k); }
   });
   return changed;
+}
+function empresaExiste(name){ return !!empresasDir[empresaKey(name)]; }
+function empresaHintText(name){
+  var n = (name||'').trim();
+  if(!n) return '';
+  return empresaExiste(n)
+    ? '✓ Empresa encontrada — datos de contacto autocompletados.'
+    : '＋ Empresa nueva: se creará al guardar el levantamiento.';
+}
+// Actualiza en el sitio (sin re-render) el aviso y los campos autocompletados.
+function updateEmpresaUI(name){
+  autofillEmpresa(name).forEach(function(k){
+    var el = mainEl.querySelector('[data-general="'+k+'"]');
+    if(el && !el.value) el.value = current.general[k];
+  });
+  var hint = mainEl.querySelector('[data-empresa-hint]');
+  if(hint){
+    hint.textContent = empresaHintText(name);
+    hint.classList.toggle('found', empresaExiste((name||'').trim()));
+  }
 }
 
 /* ---- Firestore: alcance por dueño / rol ---- */
@@ -818,7 +840,7 @@ function handleFormEvent(e){
 
   if(t.dataset.general!==undefined){
     current.general[t.dataset.general] = t.value;
-    if(t.dataset.general==='cliente') autofillEmpresa(t.value);
+    if(t.dataset.general==='cliente') updateEmpresaUI(t.value);
     if(t.dataset.rerender!==undefined) renderForm();
     return;
   }
@@ -889,7 +911,14 @@ function renderFieldInput(f, value, dataAttrs, otherValue){
   }
   var type = f.type==='number' ? 'number' : (f.type==='date' ? 'date' : 'text');
   var extra = f.type==='number' ? ' min="0"' : '';
-  if(f.autocompleteEmpresa) extra += ' list="empresas-datalist" autocomplete="off"';
+  if(f.autocompleteEmpresa){
+    extra += ' list="empresas-datalist" autocomplete="off"';
+    var hintTxt = empresaHintText(val);
+    var foundCls = empresaExiste((val||'').trim()) ? ' found' : '';
+    return '<label class="field"><span>'+escapeHtml(f.label)+'</span>'+
+      '<input type="'+type+'"'+extra+' '+dataAttrs+' value="'+escapeHtml(val)+'"/>'+
+      '<small class="empresa-hint'+foundCls+'" data-empresa-hint>'+escapeHtml(hintTxt)+'</small></label>';
+  }
   return '<label class="field"><span>'+escapeHtml(f.label)+'</span><input type="'+type+'"'+extra+' '+dataAttrs+' value="'+escapeHtml(val)+'"/></label>';
 }
 

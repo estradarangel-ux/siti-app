@@ -35,6 +35,10 @@
 
 #siti-app main{padding:18px 16px 100px;}
 
+/* Aviso bajo el campo Cliente / Empresa (empresa encontrada vs. nueva) */
+#siti-app .empresa-hint{display:block;margin-top:4px;font-size:11.5px;color:var(--text-muted);min-height:14px;}
+#siti-app .empresa-hint.found{color:var(--green-strong);}
+
 /* ---------- Buttons ---------- */
 #siti-app .btn{
   border:1px solid var(--btn-primary-bg);background:var(--btn-primary-bg);color:var(--btn-primary-text);
