@@ -43,8 +43,11 @@
     }
   }
 
+  var storageNote = document.getElementById('siti-storage-note');
+
   function applyAuthState(user){
     isAdmin = !!(user && user.role === 'admin');
+    if(storageNote) storageNote.hidden = !user;
     if(user){
       tabbar.hidden = false;
       applyTabVisibility();

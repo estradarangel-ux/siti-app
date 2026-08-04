@@ -107,8 +107,15 @@ input[type=text],input[type=number],input[type=email],input[type=password]{
 .app-tab-panel{display:none;}
 .app-tab-panel.active{display:block;}
 
+/* Aviso de almacenamiento a nivel shell: visible en todas las pestañas. */
+.app-storage-note{
+  font-size:11.5px;color:var(--text-muted);background:var(--surface-alt);
+  border-bottom:1px solid var(--border);padding:7px 16px;text-align:center;
+}
+.app-storage-note[hidden]{display:none;}
+
 @media print{
-  .app-topbar, .app-tabbar, .noprint{display:none !important;}
+  .app-topbar, .app-tabbar, .app-storage-note, .noprint{display:none !important;}
 }
 
 /* =========================================================================

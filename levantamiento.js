@@ -56,18 +56,24 @@ function initFirebase(){
 
 var SERVICE_ORDER = ['nodos','fibra','cctv_nuevo','cctv_ampliacion','pbx_nuevo','pbx_migracion','control_asistencia','control_acceso'];
 
+var CABLE_TIPOS_COBRE = ['STP Cat 5e','STP Cat 6','STP Cat 6A','UTP Cat 5e','UTP Cat 5e Gel','UTP Cat 6','UTP Cat 6 Gel','UTP Cat 6A'];
+var CABLE_MARCAS = ['Panduit','Netkey','Otro'];
+
 var GENERAL_FIELDS = [
-  {key:'cliente', label:'Cliente / Empresa', type:'text', pairWithNext:true},
+  {key:'cliente', label:'Cliente / Empresa', type:'text', pairWithNext:true, autocompleteEmpresa:true, triggersRerender:true},
   {key:'contacto', label:'Nombre de contacto', type:'text'},
+  {key:'proyecto', label:'Proyecto', type:'text', pairWithNext:true},
+  {key:'sucursal', label:'Sucursal', type:'text'},
   {key:'telefono', label:'Teléfono', type:'text', pairWithNext:true},
   {key:'email', label:'Correo electrónico', type:'text'},
   {key:'direccion', label:'Dirección del sitio', type:'textarea'},
+  {key:'cable_categoria', label:'Categoría de cableado (cobre)', type:'select', options:CABLE_TIPOS_COBRE, pairWithNext:true},
+  {key:'cable_marca', label:'Marca de cableado', type:'select', options:CABLE_MARCAS, triggersRerender:true},
+  {key:'cable_marca_otro', label:'Especifique la marca de cableado', type:'text', showIf:{field:'cable_marca', equals:'Otro'}},
   {key:'fecha', label:'Fecha del levantamiento', type:'date', pairWithNext:true},
   {key:'tecnico', label:'Técnico responsable', type:'text'},
   {key:'notas_generales', label:'Observaciones del sitio (acceso, horarios, restricciones)', type:'textarea'}
 ];
-
-var CABLE_TIPOS_COBRE = ['STP Cat 5e','STP Cat 6','STP Cat 6A','UTP Cat 5e','UTP Cat 5e Gel','UTP Cat 6','UTP Cat 6 Gel','UTP Cat 6A'];
 
 var SERVICES = {
   nodos:{
@@ -83,7 +89,7 @@ var SERVICES = {
     repeatable:{key:'puntos', label:'Nodos de red a instalar', itemLabel:'Nodo', addLabel:'+ Servicio', hasCanalizacionDetail:true, fields:[
       {key:'ubicacion', label:'Ubicación (edificio / piso / área)', type:'text'},
       {key:'distancia', label:'Distancia al rack o switch principal (m)', type:'number'},
-      {key:'tipo_cable', label:'Tipo de cable requerido', type:'select', options:CABLE_TIPOS_COBRE},
+      {key:'tipo_cable', label:'Tipo de cable requerido', type:'select', options:CABLE_TIPOS_COBRE, inheritCable:true},
       {key:'canalizacion', label:'¿Requiere canalización nueva?', type:'select', options:['Sí','No','Parcial'], triggersRerender:true},
       {key:'observaciones', label:'Observaciones (ej. requiere plataforma, barrenar muro, ranurar piso o muro, etc.)', type:'textarea'}
     ]}
@@ -127,7 +133,7 @@ var SERVICES = {
       {key:'tipo', label:'Tipo de cámara', type:'select', options:['180°','360°','Bullet','Domo','PTZ','Otra']},
       {key:'ambiente', label:'Ambiente', type:'select', options:['Exterior','Interior']},
       {key:'resolucion', label:'Resolución deseada', type:'select', options:['4K','4MP','HD (2MP)','Por definir']},
-      {key:'tipo_cable_camara', label:'Tipo de cable para esta cámara', type:'select', options:CABLE_TIPOS_COBRE},
+      {key:'tipo_cable_camara', label:'Tipo de cable para esta cámara', type:'select', options:CABLE_TIPOS_COBRE, inheritCable:true},
       {key:'distancia', label:'Distancia al NVR / DVR (m)', type:'number'},
       {key:'canalizacion', label:'¿Requiere canalización nueva?', type:'select', options:['Sí','No','Parcial'], triggersRerender:true},
       {key:'observaciones', label:'Observaciones', type:'textarea'}
@@ -149,7 +155,7 @@ var SERVICES = {
       {key:'tipo', label:'Tipo de cámara', type:'select', options:['180°','360°','Bullet','Domo','PTZ','Otra']},
       {key:'ambiente', label:'Ambiente', type:'select', options:['Exterior','Interior']},
       {key:'resolucion', label:'Resolución deseada', type:'select', options:['4K','4MP','HD (2MP)','Por definir']},
-      {key:'tipo_cable_camara', label:'Tipo de cable para esta cámara', type:'select', options:CABLE_TIPOS_COBRE},
+      {key:'tipo_cable_camara', label:'Tipo de cable para esta cámara', type:'select', options:CABLE_TIPOS_COBRE, inheritCable:true},
       {key:'distancia', label:'Distancia al NVR / DVR (m)', type:'number'},
       {key:'canalizacion', label:'¿Requiere canalización nueva?', type:'select', options:['Sí','No','Parcial'], triggersRerender:true},
       {key:'observaciones', label:'Observaciones', type:'textarea'}
@@ -199,7 +205,7 @@ var SERVICES = {
     repeatable:{key:'checadores', label:'Checadores a instalar', itemLabel:'Checador', hasCanalizacionDetail:true, fields:[
       {key:'ubicacion', label:'Ubicación (edificio / piso / área)', type:'text'},
       {key:'distancia', label:'Distancia al switch o rack más cercano (m)', type:'number'},
-      {key:'tipo_cable', label:'Tipo de cable requerido', type:'select', options:CABLE_TIPOS_COBRE},
+      {key:'tipo_cable', label:'Tipo de cable requerido', type:'select', options:CABLE_TIPOS_COBRE, inheritCable:true},
       {key:'canalizacion', label:'¿Requiere canalización nueva?', type:'select', options:['Sí','No','Parcial'], triggersRerender:true},
       {key:'observaciones', label:'Observaciones', type:'textarea'}
     ]}
@@ -238,6 +244,8 @@ var backend = 'local'; // 'claude' | 'firebase' | 'local' — resuelto al arranc
 var currentUser = null; // {uid, email, role, disabled} — solo aplica en backend 'firebase'
 var allUsersCache = null; // lista de usuarios (solo se llena para el admin)
 var adminFilterOwnerId = 'ALL'; // filtro de "ver levantamientos de" para el admin
+var empresasDir = {}; // directorio de empresas {claveMinuscula: {cliente, contacto, telefono, email, direccion}}
+var empresasNames = []; // nombres de empresa para el autocompletar
 
 var mainEl = document.getElementById('siti-main');
 var toastEl = document.getElementById('siti-toast');
@@ -378,6 +386,40 @@ function persistSurvey(survey){
 function removeSurveyStorage(id){
   if(backend==='firebase') return fbDb.collection('surveys').doc(id).delete().catch(function(){});
   return storageDelete('survey:'+id);
+}
+
+/* ---- Directorio de empresas (autocompletado de datos de contacto) ----
+   Se guarda por dispositivo. Al escribir un cliente ya conocido, rellena los
+   campos de contacto vacíos para no volver a capturarlos. */
+var EMPRESA_AUTOFILL_FIELDS = ['contacto','telefono','email','direccion'];
+function empresaKey(name){ return (name||'').trim().toLowerCase(); }
+function refreshEmpresasNames(){
+  empresasNames = Object.keys(empresasDir).map(function(k){ return empresasDir[k].cliente; })
+    .filter(Boolean).sort(function(a,b){ return a.localeCompare(b,'es'); });
+}
+function loadEmpresas(){
+  return storageGet('empresas-dir').then(function(v){
+    empresasDir = v ? (JSON.parse(v) || {}) : {};
+  }).catch(function(){ empresasDir = {}; }).then(function(){ refreshEmpresasNames(); });
+}
+function upsertEmpresa(general){
+  var name = (general.cliente||'').trim();
+  if(!name) return Promise.resolve();
+  var rec = {cliente: name};
+  EMPRESA_AUTOFILL_FIELDS.forEach(function(k){ if(general[k]) rec[k] = general[k]; });
+  empresasDir[empresaKey(name)] = rec;
+  refreshEmpresasNames();
+  return storageSet('empresas-dir', JSON.stringify(empresasDir)).catch(function(){});
+}
+// Rellena los campos de contacto vacíos con los de la empresa conocida.
+function autofillEmpresa(name){
+  var rec = empresasDir[empresaKey(name)];
+  if(!rec) return false;
+  var changed = false;
+  EMPRESA_AUTOFILL_FIELDS.forEach(function(k){
+    if(!current.general[k] && rec[k]){ current.general[k] = rec[k]; changed = true; }
+  });
+  return changed;
 }
 
 /* ---- Firestore: alcance por dueño / rol ---- */
@@ -654,11 +696,27 @@ function deleteUserProfile(uid, email){
 
 /* ================= DATA MODEL HELPERS ================= */
 
+function genFolio(ts){
+  var d = new Date(ts || Date.now());
+  function pad(n){ return (n<10?'0':'')+n; }
+  var ymd = '' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate());
+  var suffix = Math.random().toString(36).slice(2,5).toUpperCase();
+  return 'SITI-' + ymd + '-' + suffix;
+}
+// Devuelve el folio del levantamiento; lo genera y fija si aún no existe.
+function surveyFolio(s){
+  if(!s) return '';
+  if(!s.folio) s.folio = genFolio(s.createdAt);
+  return s.folio;
+}
+
 function newSurveyState(){
+  var now = Date.now();
   var s = {
     id: genId(),
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    folio: genFolio(now),
+    createdAt: now,
+    updatedAt: now,
     general: {fecha: todayISO()},
     services: [],
     data: {}
@@ -760,6 +818,7 @@ function handleFormEvent(e){
 
   if(t.dataset.general!==undefined){
     current.general[t.dataset.general] = t.value;
+    if(t.dataset.general==='cliente') autofillEmpresa(t.value);
     if(t.dataset.rerender!==undefined) renderForm();
     return;
   }
@@ -806,7 +865,8 @@ function renderFieldInput(f, value, dataAttrs, otherValue){
   }
   if(f.type==='select'){
     var selOpts = finalizeOptions(f.options);
-    var opts = '<option value="">— Selecciona —</option>' + selOpts.map(function(o){
+    var emptyLabel = f.emptyLabel || '— Selecciona —';
+    var opts = '<option value="">'+escapeHtml(emptyLabel)+'</option>' + selOpts.map(function(o){
       return '<option value="'+escapeHtml(o)+'" '+(o===val?'selected':'')+'>'+escapeHtml(o)+'</option>';
     }).join('');
     return '<label class="field"><span>'+escapeHtml(f.label)+'</span><select '+dataAttrs+'>'+opts+'</select></label>';
@@ -829,16 +889,18 @@ function renderFieldInput(f, value, dataAttrs, otherValue){
   }
   var type = f.type==='number' ? 'number' : (f.type==='date' ? 'date' : 'text');
   var extra = f.type==='number' ? ' min="0"' : '';
+  if(f.autocompleteEmpresa) extra += ' list="empresas-datalist" autocomplete="off"';
   return '<label class="field"><span>'+escapeHtml(f.label)+'</span><input type="'+type+'"'+extra+' '+dataAttrs+' value="'+escapeHtml(val)+'"/></label>';
 }
 
 function renderGeneralSection(){
+  var visible = GENERAL_FIELDS.filter(function(f){ return passesShowIf(f, current.general); });
   var html = '';
-  for(var i=0;i<GENERAL_FIELDS.length;i++){
-    var f = GENERAL_FIELDS[i];
+  for(var i=0;i<visible.length;i++){
+    var f = visible[i];
     var attrs = 'data-general="'+f.key+'"';
-    if(f.pairWithNext && GENERAL_FIELDS[i+1]){
-      var f2 = GENERAL_FIELDS[i+1];
+    if(f.pairWithNext && visible[i+1]){
+      var f2 = visible[i+1];
       var html1 = renderFieldInput(f, current.general[f.key], attrs);
       var html2 = renderFieldInput(f2, current.general[f2.key], 'data-general="'+f2.key+'"');
       html += '<div class="field-row">'+html1+html2+'</div>';
@@ -847,7 +909,10 @@ function renderGeneralSection(){
     }
     html += renderFieldInput(f, current.general[f.key], attrs);
   }
-  return '<div class="section"><div class="sec-title disp">Datos generales del sitio</div><div class="sec-body">'+html+'</div></div>';
+  var datalist = '<datalist id="empresas-datalist">'+empresasNames.map(function(n){
+    return '<option value="'+escapeHtml(n)+'"></option>';
+  }).join('')+'</datalist>';
+  return '<div class="section"><div class="sec-title disp">Datos generales del sitio</div><div class="sec-body">'+html+datalist+'</div></div>';
 }
 
 function renderServiceSelector(){
@@ -922,6 +987,10 @@ function renderRepeatable(serviceKey, conf){
         var opts = f.optionsByValue.map[triggerVal] || [];
         if(!opts.length) return '';
         fieldDef = Object.assign({}, f, {options:opts});
+      }
+      // Cable: si no se define en el punto, hereda la categoría general del levantamiento.
+      if(f.inheritCable && current.general.cable_categoria){
+        fieldDef = Object.assign({}, fieldDef, {emptyLabel:'Igual a la general ('+current.general.cable_categoria+')'});
       }
       var attrs = 'data-service="'+serviceKey+'" data-group="'+rep.key+'" data-index="'+idx+'" data-field="'+f.key+'"';
       return renderFieldInput(fieldDef, item[f.key], attrs);
@@ -1102,7 +1171,7 @@ function doSave(){
   current.updatedAt = Date.now();
   delete current._isNew;
   upsertIndexEntry(current);
-  Promise.all([persistSurvey(current), saveIndex()]).then(function(){
+  Promise.all([persistSurvey(current), saveIndex(), upsertEmpresa(current.general)]).then(function(){
     showToast('Levantamiento guardado');
     goSummary(current.id);
   }).catch(function(){
@@ -1224,6 +1293,13 @@ function fieldValueText(f, value){
   if(f.type==='date') return fmtDate(value);
   return String(value);
 }
+// Valor de un campo de punto para el resumen/exportación, resolviendo la
+// herencia del cable (si el punto no lo define, usa la categoría general).
+function itemFieldValue(f, item){
+  var v = item[f.key];
+  if(f.inheritCable && (v===undefined||v===null||v==='')) return current.general.cable_categoria || '';
+  return v;
+}
 
 function canalizacionDetailText(item){
   var rows = item.canalizacion_detalle || [];
@@ -1289,7 +1365,7 @@ function renderSummaryService(key){
     if(items.length){
       html += '<div class="summary-item-list">' + items.map(function(item, idx){
         var itemRows = conf.repeatable.fields.map(function(f){
-          var v = fieldValueText(f, item[f.key]);
+          var v = fieldValueText(f, itemFieldValue(f, item));
           return v ? '<dt>'+escapeHtml(f.label)+'</dt><dd>'+escapeHtml(v)+'</dd>' : '';
         }).join('');
         var card = '<div class="summary-item"><div class="summary-item-title">'+escapeHtml(conf.repeatable.itemLabel)+' '+(idx+1)+'</div>';
@@ -1340,7 +1416,7 @@ function buildTextSummary(){
         lines.push('  '+conf.repeatable.label+':');
         items.forEach(function(item, idx){
           var parts = conf.repeatable.fields.map(function(f){
-            var v = fieldValueText(f,item[f.key]);
+            var v = fieldValueText(f, itemFieldValue(f, item));
             return v ? f.label+'='+v : null;
           }).filter(Boolean);
           if(conf.repeatable.hasCanalizacionDetail){
@@ -1420,7 +1496,7 @@ function buildCSV(){
         lines.push(csvRow([conf.repeatable.label]));
         lines.push(csvRow(['#'].concat(cols.map(function(f){ return f.label; }))));
         items.forEach(function(item, idx){
-          lines.push(csvRow([idx+1].concat(cols.map(function(f){ return fieldValueText(f, item[f.key]); }))));
+          lines.push(csvRow([idx+1].concat(cols.map(function(f){ return fieldValueText(f, itemFieldValue(f, item)); }))));
         });
 
         if(conf.repeatable.hasCanalizacionDetail){
@@ -1478,6 +1554,22 @@ function downloadCSV(){
 }
 
 
+// Imprime / guarda PDF. El nombre sugerido del archivo es "folio Proyecto fecha".
+var _printTitlePrev = null;
+function printSurvey(s){
+  var folio = surveyFolio(s);
+  var proyecto = (s.general.proyecto || '').trim();
+  var fecha = s.general.fecha ? fmtDate(s.general.fecha).replace(/\//g, '-') : '';
+  var name = [folio, proyecto, fecha].filter(Boolean).join(' ')
+    .replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
+  _printTitlePrev = document.title;
+  if(name) document.title = name;
+  window.print();
+}
+window.addEventListener('afterprint', function(){
+  if(_printTitlePrev !== null){ document.title = _printTitlePrev; _printTitlePrev = null; }
+});
+
 function renderSummary(){
   var html = '<div class="noprint" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">'+
     '<button class="btn secondary" id="btn-back-list">← Levantamientos</button>'+
@@ -1487,8 +1579,13 @@ function renderSummary(){
     '<button class="btn ghost" id="btn-csv">Descargar CSV</button>'+
   '</div>';
 
+  var folio = surveyFolio(current);
+  var subParts = ['Folio: '+folio];
+  if(current.general.proyecto) subParts.push(escapeHtml(current.general.proyecto));
+  if(current.general.fecha) subParts.push(fmtDate(current.general.fecha));
   html += '<div class="summary-header"><img src="'+LOGO_SRC+'" alt="SITI"/>'+
-    '<div><div class="doc-title">Resumen de levantamiento en sitio</div></div></div>';
+    '<div><div class="doc-title">Resumen de levantamiento en sitio</div>'+
+    '<div class="doc-folio" style="font-size:12px;color:var(--text-muted);margin-top:2px;">'+subParts.join(' · ')+'</div></div></div>';
 
   if(backend==='firebase' && currentUser && currentUser.role==='admin' && current.ownerEmail && current.ownerEmail!==currentUser.email){
     html += '<p class="summary-empty-note" style="margin-bottom:14px;">Capturado por: '+escapeHtml(current.ownerEmail)+'</p>';
@@ -1517,7 +1614,7 @@ function renderSummary(){
   mainEl.innerHTML = html;
   document.getElementById('btn-back-list').onclick = goList;
   document.getElementById('btn-edit-this').onclick = function(){ goEdit(current.id); };
-  document.getElementById('btn-print').onclick = function(){ window.print(); };
+  document.getElementById('btn-print').onclick = function(){ printSurvey(current); };
   document.getElementById('btn-copy').onclick = function(){
     var text = buildTextSummary();
     function fallbackCopy(){
@@ -1551,17 +1648,20 @@ mainEl.addEventListener('input', function(e){ if(view==='form') handleFormEvent(
 mainEl.addEventListener('change', function(e){ if(view==='form') handleFormEvent(e); });
 
 var noteEl = document.getElementById('siti-storage-note');
+var STORAGE_NOTE_TEXT = 'La información queda guardada en el sistema.';
 function setStorageNote(text){ if(noteEl) noteEl.textContent = text; }
+
+loadEmpresas();
 
 if(hasClaudeStorage()){
   backend = 'claude';
-  setStorageNote('Estos levantamientos se guardan compartidos: cualquier persona con acceso a esta app puede verlos y editarlos.');
+  setStorageNote(STORAGE_NOTE_TEXT);
   currentUser = {uid:'preview', email:'vista previa', role:'admin', disabled:false};
   goList();
   broadcastAuth();
 } else if(isFirebaseConfigured()){
   backend = 'firebase';
-  setStorageNote('Cada técnico ve únicamente sus propios levantamientos. El administrador puede ver los de todo el equipo.');
+  setStorageNote(STORAGE_NOTE_TEXT);
   mainEl.innerHTML = '<p style="color:var(--text-faint);font-size:14px;padding:20px 0;">Cargando…</p>';
   initFirebase().then(startFirebaseAuthListener).catch(function(){
     showToast('No se pudo conectar con Firebase. Revisa tu configuración.', true);
@@ -1569,7 +1669,7 @@ if(hasClaudeStorage()){
   });
 } else {
   backend = 'local';
-  setStorageNote('Los levantamientos se guardan solo en este navegador/dispositivo.');
+  setStorageNote(STORAGE_NOTE_TEXT);
   currentUser = {uid:'local', email:'este dispositivo', role:'admin', disabled:false};
   goList();
   broadcastAuth();
