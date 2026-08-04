@@ -26,8 +26,9 @@ catálogo compartido.
 
 ## Notas
 
-- Una empresa nueva capturada por un técnico aparece para los demás la próxima
-  vez que **cargan la app o inician sesión** (no en tiempo real).
+- El catálogo se sincroniza **en tiempo real**: una empresa nueva capturada por
+  un técnico aparece de inmediato en los demás dispositivos con la app abierta
+  (suscripción `onSnapshot` de Firestore).
 - No se borra información: si un campo se guarda vacío, se conserva el último
   dato conocido de esa empresa (`merge`).
 - En modo local / preview (sin Firebase) el catálogo se guarda solo en ese

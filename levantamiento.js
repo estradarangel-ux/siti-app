@@ -67,9 +67,6 @@ var GENERAL_FIELDS = [
   {key:'telefono', label:'Teléfono', type:'text', pairWithNext:true},
   {key:'email', label:'Correo electrónico', type:'text'},
   {key:'direccion', label:'Dirección del sitio', type:'textarea'},
-  {key:'cable_categoria', label:'Categoría de cableado (cobre)', type:'select', options:CABLE_TIPOS_COBRE, pairWithNext:true},
-  {key:'cable_marca', label:'Marca de cableado', type:'select', options:CABLE_MARCAS, triggersRerender:true},
-  {key:'cable_marca_otro', label:'Especifique la marca de cableado', type:'text', showIf:{field:'cable_marca', equals:'Otro'}},
   {key:'fecha', label:'Fecha del levantamiento', type:'date', pairWithNext:true},
   {key:'tecnico', label:'Técnico responsable', type:'text'},
   {key:'notas_generales', label:'Observaciones del sitio (acceso, horarios, restricciones)', type:'textarea'}
@@ -79,8 +76,10 @@ var SERVICES = {
   nodos:{
     label:'Nodos de red', short:'Nodos de red',
     fields:[
-      {key:'nodos_datos', label:'Nodos de red a cotizar — Datos (cantidad)', type:'number', pairWithNext:true},
-      {key:'nodos_voz', label:'Nodos de red a cotizar — Voz (cantidad)', type:'number'},
+      {key:'nodos_datos', label:'Nodos a cotizar', type:'number'},
+      {key:'cable_categoria', label:'Categoría de cableado (cobre)', type:'select', options:CABLE_TIPOS_COBRE, pairWithNext:true},
+      {key:'cable_marca', label:'Marca de cableado', type:'select', options:CABLE_MARCAS, triggersRerender:true},
+      {key:'cable_marca_otro', label:'Especifique la marca de cableado', type:'text', showIf:{field:'cable_marca', equals:'Otro'}},
       {key:'infraestructura_rack', label:'¿Existe rack o gabinete disponible?', type:'select', options:['Sí','No','No aplica']},
       {key:'panel_espacio', label:'¿Cuenta con espacio suficiente en panel de parcheo?', type:'select', options:['Sí','No','No aplica'], triggersRerender:true},
       {key:'switch_existente', label:'Panel/Switch existente (marca/modelo/puertos libres)', type:'text', showIf:{field:'panel_espacio', equals:'Sí'}},
@@ -246,6 +245,7 @@ var allUsersCache = null; // lista de usuarios (solo se llena para el admin)
 var adminFilterOwnerId = 'ALL'; // filtro de "ver levantamientos de" para el admin
 var empresasDir = {}; // directorio de empresas {claveMinuscula: {cliente, contacto, telefono, email, direccion}}
 var empresasNames = []; // nombres de empresa para el autocompletar
+var empresasUnsub = null; // función para cancelar la suscripción en vivo (Firestore)
 
 var mainEl = document.getElementById('siti-main');
 var toastEl = document.getElementById('siti-toast');
@@ -402,29 +402,52 @@ function refreshEmpresasNames(){
   empresasNames = Object.keys(empresasDir).map(function(k){ return empresasDir[k].cliente; })
     .filter(Boolean).sort(function(a,b){ return a.localeCompare(b,'es'); });
 }
-function loadEmpresasFirebase(){
-  return fbDb.collection('empresas').get().then(function(snap){
-    var dir = {};
-    snap.forEach(function(doc){
-      var d = doc.data(); var name = d.cliente || '';
-      if(!name) return;
-      var rec = {cliente: name};
-      EMPRESA_AUTOFILL_FIELDS.forEach(function(k){ if(d[k]) rec[k] = d[k]; });
-      dir[empresaKey(name)] = rec;
-    });
-    empresasDir = dir;
-  }).catch(function(){ /* si las reglas lo bloquean, queda vacío */ });
+function empresasDirFromSnap(snap){
+  var dir = {};
+  snap.forEach(function(doc){
+    var d = doc.data(); var name = d.cliente || '';
+    if(!name) return;
+    var rec = {cliente: name};
+    EMPRESA_AUTOFILL_FIELDS.forEach(function(k){ if(d[k]) rec[k] = d[k]; });
+    dir[empresaKey(name)] = rec;
+  });
+  return dir;
 }
-function loadEmpresas(){
-  var p;
-  if(backend==='firebase' && fbDb){
-    p = loadEmpresasFirebase();
-  } else {
-    p = storageGet('empresas-dir').then(function(v){
-      empresasDir = v ? (JSON.parse(v) || {}) : {};
-    }).catch(function(){ empresasDir = {}; });
+// Suscripción en vivo al catálogo compartido: cualquier empresa nueva capturada
+// por otro técnico aparece al instante en todos los dispositivos.
+function subscribeEmpresas(){
+  if(!fbDb) return;
+  if(empresasUnsub){ empresasUnsub(); empresasUnsub = null; }
+  empresasUnsub = fbDb.collection('empresas').onSnapshot(function(snap){
+    empresasDir = empresasDirFromSnap(snap);
+    refreshEmpresasNames();
+    refreshEmpresasDatalist();
+  }, function(){ /* reglas o sin conexión: se conserva lo último cargado */ });
+}
+function unsubscribeEmpresas(){
+  if(empresasUnsub){ empresasUnsub(); empresasUnsub = null; }
+}
+// Refresca en el sitio la lista desplegable y el aviso del campo Cliente
+// (sin re-render, para no perder el foco mientras se escribe).
+function refreshEmpresasDatalist(){
+  var dl = document.getElementById('empresas-datalist');
+  if(dl){
+    dl.innerHTML = empresasNames.map(function(n){ return '<option value="'+escapeHtml(n)+'"></option>'; }).join('');
   }
-  return p.then(function(){ refreshEmpresasNames(); });
+  var cli = mainEl.querySelector('[data-general="cliente"]');
+  if(cli){
+    var hint = mainEl.querySelector('[data-empresa-hint]');
+    if(hint){
+      hint.textContent = empresaHintText(cli.value);
+      hint.classList.toggle('found', empresaExiste((cli.value||'').trim()));
+    }
+  }
+}
+// Carga por dispositivo (local / preview). En Firebase se usa subscribeEmpresas().
+function loadEmpresas(){
+  return storageGet('empresas-dir').then(function(v){
+    empresasDir = v ? (JSON.parse(v) || {}) : {};
+  }).catch(function(){ empresasDir = {}; }).then(function(){ refreshEmpresasNames(); });
 }
 function upsertEmpresa(general){
   var name = (general.cliente||'').trim();
@@ -563,9 +586,8 @@ function startFirebaseAuthListener(){
         allUsersCache = null;
         adminFilterOwnerId = 'ALL';
         renderUserbar();
-        // Carga el catálogo de empresas compartido (Firestore); si un formulario
-        // ya está abierto, refresca su lista al terminar.
-        loadEmpresas().then(function(){ if(view==='form') renderForm(); });
+        // Suscribe el catálogo de empresas compartido (se actualiza en vivo).
+        subscribeEmpresas();
         goList();
         broadcastAuth();
       }).catch(function(){
@@ -573,6 +595,7 @@ function startFirebaseAuthListener(){
       });
     } else {
       currentUser = null;
+      unsubscribeEmpresas();
       renderUserbar();
       view = 'login';
       renderLogin();
@@ -1050,9 +1073,10 @@ function renderRepeatable(serviceKey, conf){
         if(!opts.length) return '';
         fieldDef = Object.assign({}, f, {options:opts});
       }
-      // Cable: si no se define en el punto, hereda la categoría general del levantamiento.
-      if(f.inheritCable && current.general.cable_categoria){
-        fieldDef = Object.assign({}, fieldDef, {emptyLabel:'Igual a la general ('+current.general.cable_categoria+')'});
+      // Cable: si no se define en el punto, hereda la categoría del servicio.
+      var svcCat = serviceCableCat(serviceKey);
+      if(f.inheritCable && svcCat){
+        fieldDef = Object.assign({}, fieldDef, {emptyLabel:'Igual a la del servicio ('+svcCat+')'});
       }
       var attrs = 'data-service="'+serviceKey+'" data-group="'+rep.key+'" data-index="'+idx+'" data-field="'+f.key+'"';
       return renderFieldInput(fieldDef, item[f.key], attrs);
@@ -1355,11 +1379,16 @@ function fieldValueText(f, value){
   if(f.type==='date') return fmtDate(value);
   return String(value);
 }
+// Categoría de cableado definida a nivel del servicio (ej. en Nodos de red).
+function serviceCableCat(serviceKey){
+  var d = current.data[serviceKey];
+  return (d && d.fields && d.fields.cable_categoria) || '';
+}
 // Valor de un campo de punto para el resumen/exportación, resolviendo la
-// herencia del cable (si el punto no lo define, usa la categoría general).
-function itemFieldValue(f, item){
+// herencia del cable (si el punto no lo define, usa la categoría del servicio).
+function itemFieldValue(f, item, serviceKey){
   var v = item[f.key];
-  if(f.inheritCable && (v===undefined||v===null||v==='')) return current.general.cable_categoria || '';
+  if(f.inheritCable && (v===undefined||v===null||v==='')) return serviceCableCat(serviceKey);
   return v;
 }
 
@@ -1427,7 +1456,7 @@ function renderSummaryService(key){
     if(items.length){
       html += '<div class="summary-item-list">' + items.map(function(item, idx){
         var itemRows = conf.repeatable.fields.map(function(f){
-          var v = fieldValueText(f, itemFieldValue(f, item));
+          var v = fieldValueText(f, itemFieldValue(f, item, key));
           return v ? '<dt>'+escapeHtml(f.label)+'</dt><dd>'+escapeHtml(v)+'</dd>' : '';
         }).join('');
         var card = '<div class="summary-item"><div class="summary-item-title">'+escapeHtml(conf.repeatable.itemLabel)+' '+(idx+1)+'</div>';
@@ -1478,7 +1507,7 @@ function buildTextSummary(){
         lines.push('  '+conf.repeatable.label+':');
         items.forEach(function(item, idx){
           var parts = conf.repeatable.fields.map(function(f){
-            var v = fieldValueText(f, itemFieldValue(f, item));
+            var v = fieldValueText(f, itemFieldValue(f, item, key));
             return v ? f.label+'='+v : null;
           }).filter(Boolean);
           if(conf.repeatable.hasCanalizacionDetail){
@@ -1558,7 +1587,7 @@ function buildCSV(){
         lines.push(csvRow([conf.repeatable.label]));
         lines.push(csvRow(['#'].concat(cols.map(function(f){ return f.label; }))));
         items.forEach(function(item, idx){
-          lines.push(csvRow([idx+1].concat(cols.map(function(f){ return fieldValueText(f, itemFieldValue(f, item)); }))));
+          lines.push(csvRow([idx+1].concat(cols.map(function(f){ return fieldValueText(f, itemFieldValue(f, item, key)); }))));
         });
 
         if(conf.repeatable.hasCanalizacionDetail){
