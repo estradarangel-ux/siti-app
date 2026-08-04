@@ -1,0 +1,203 @@
+/* Levantamiento en Sitio — estilos de componentes (usa los tokens globales de styles.css) */
+#siti-app{
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+  color:var(--text);
+  background:var(--bg);
+  max-width:760px;
+  margin:0 auto;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+@media (min-width:900px){ #siti-app{ max-width:880px; } }
+@media (min-width:1200px){ #siti-app{ max-width:1040px; } }
+#siti-app *{box-sizing:border-box;}
+#siti-app .disp{font-family:'Space Grotesk','Inter',system-ui,sans-serif;}
+#siti-app h1,#siti-app h2,#siti-app h3{font-family:'Space Grotesk','Inter',system-ui,sans-serif;margin:0;font-weight:700;}
+#siti-app button{font-family:inherit;cursor:pointer;}
+#siti-app ::selection{background:var(--green);color:#fff;}
+
+/* ---------- Topbar ---------- */
+#siti-app .topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--topbar-bg);backdrop-filter:blur(4px);z-index:20;
+}
+#siti-app .topbar img{height:34px;width:34px;object-fit:contain;flex:0 0 auto;}
+#siti-app .topbar .word{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);}
+#siti-app .topbar .brand-title{font-size:15px;letter-spacing:.02em;}
+#siti-app .topbar-actions{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+#siti-app .theme-toggle{padding:7px 11px;font-size:12px;white-space:nowrap;}
+
+#siti-app .storage-note{
+  font-size:11.5px;color:var(--text-muted);background:var(--surface-alt);border-bottom:1px solid var(--border);
+  padding:7px 16px;text-align:center;
+}
+
+#siti-app main{padding:18px 16px 100px;}
+
+/* ---------- Buttons ---------- */
+#siti-app .btn{
+  border:1px solid var(--btn-primary-bg);background:var(--btn-primary-bg);color:var(--btn-primary-text);
+  padding:11px 18px;font-size:14px;font-weight:600;letter-spacing:.01em;
+  border-radius:0;transition:background .15s,color .15s,border-color .15s;
+}
+#siti-app .btn:hover{background:var(--green-strong);border-color:var(--green-strong);}
+#siti-app .btn.secondary{background:transparent;color:var(--text);border-color:var(--btn-primary-bg);}
+#siti-app .btn.secondary:hover{background:var(--surface-alt);}
+#siti-app .btn.ghost{background:transparent;border-color:var(--border);color:var(--text-muted);}
+#siti-app .btn.ghost:hover{border-color:var(--text);color:var(--text);}
+#siti-app .btn.danger{background:transparent;border-color:var(--danger);color:var(--danger);}
+#siti-app .btn.danger:hover{background:var(--danger);color:#fff;}
+#siti-app .btn.block{width:100%;}
+#siti-app .btn:focus-visible, #siti-app input:focus-visible, #siti-app select:focus-visible, #siti-app textarea:focus-visible, #siti-app .service-card:focus-within{
+  outline:2px solid var(--green);outline-offset:2px;
+}
+
+/* ---------- List view ---------- */
+#siti-app .list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;}
+#siti-app .empty-state{
+  border:1px dashed var(--border);padding:40px 20px;text-align:center;color:var(--text-muted);font-size:14px;
+}
+#siti-app .survey-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+@media (min-width:700px){ #siti-app .survey-grid{grid-template-columns:1fr 1fr;} }
+@media (min-width:1150px){ #siti-app .survey-grid{grid-template-columns:1fr 1fr 1fr;} }
+#siti-app .survey-card{
+  border:1px solid var(--border);padding:14px 16px;position:relative;background:var(--surface);
+}
+#siti-app .survey-card h3{font-size:16px;margin-bottom:2px;}
+#siti-app .survey-card .meta{font-size:12.5px;color:var(--text-muted);margin-bottom:8px;}
+#siti-app .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+#siti-app .chip{font-size:11px;letter-spacing:.02em;text-transform:uppercase;border:1px solid var(--green);color:var(--green-strong);background:var(--green-tint);padding:3px 8px;}
+#siti-app .card-actions{display:flex;gap:8px;flex-wrap:wrap;}
+#siti-app .card-actions .btn{padding:8px 12px;font-size:13px;}
+
+/* ---------- Corner bracket signature ---------- */
+#siti-app .bracket{position:relative;}
+#siti-app .bracket::before,#siti-app .bracket::after{
+  content:"";position:absolute;width:11px;height:11px;pointer-events:none;
+}
+#siti-app .bracket::before{top:-1px;left:-1px;border-top:2px solid var(--green);border-left:2px solid var(--green);}
+#siti-app .bracket::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--green);border-right:2px solid var(--green);}
+
+/* ---------- Sections / accordion ---------- */
+#siti-app .section{border:1px solid var(--border);margin-bottom:14px;background:var(--surface);}
+#siti-app .section > .sec-title{
+  padding:13px 16px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+  border-bottom:1px solid var(--border);color:var(--text-muted);
+}
+#siti-app .sec-body{padding:16px;}
+
+#siti-app .accordion-head{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--surface-alt);border:none;padding:14px 16px;text-align:left;color:var(--text);
+}
+#siti-app .accordion-head h3{font-size:14.5px;letter-spacing:.02em;}
+#siti-app .accordion-head .arrow{font-size:12px;color:var(--text-muted);transition:transform .15s;}
+#siti-app .accordion.open .accordion-head .arrow{transform:rotate(90deg);}
+#siti-app .accordion-body{padding:16px;border-top:1px solid var(--border);}
+#siti-app .accordion-body[hidden]{display:none;}
+
+/* ---------- Fields ---------- */
+#siti-app .field{display:block;margin-bottom:14px;}
+#siti-app .field span{display:block;font-size:12.5px;color:var(--text-muted);margin-bottom:5px;font-weight:500;}
+#siti-app input[type=text],#siti-app input[type=number],#siti-app input[type=date],#siti-app input[type=email],#siti-app input[type=password],#siti-app select,#siti-app textarea{
+  width:100%;border:1px solid var(--border);background:var(--surface);padding:10px 11px;font-size:14.5px;color:var(--text);
+  border-radius:0;font-family:inherit;
+}
+#siti-app textarea{resize:vertical;min-height:56px;}
+#siti-app .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:520px){#siti-app .field-row{grid-template-columns:1fr;}}
+
+#siti-app .chip-check-group{display:flex;flex-wrap:wrap;gap:8px;}
+#siti-app .chip-check{border:1px solid var(--border);padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer;}
+#siti-app .chip-check input{margin:0;}
+#siti-app .chip-check:has(input:checked){border-color:var(--green);background:var(--green-tint);color:var(--green-strong);}
+
+/* ---------- Service selector cards ---------- */
+#siti-app .service-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media (max-width:480px){#siti-app .service-grid{grid-template-columns:1fr;}}
+@media (min-width:900px){#siti-app .service-grid{grid-template-columns:1fr 1fr 1fr;}}
+#siti-app .service-card{
+  border:1px solid var(--border);padding:12px 13px;position:relative;display:flex;align-items:flex-start;gap:10px;
+}
+#siti-app .service-card input{position:absolute;opacity:0;width:1px;height:1px;}
+#siti-app .service-card .box{width:16px;height:16px;border:1.5px solid var(--text-faint);flex:0 0 auto;margin-top:1px;position:relative;}
+#siti-app .service-card:has(input:checked){border-color:var(--green);background:var(--green-tint);}
+#siti-app .service-card:has(input:checked) .box{background:var(--green);border-color:var(--green);}
+#siti-app .service-card:has(input:checked) .box::after{
+  content:"";position:absolute;left:3px;top:0px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg);
+}
+#siti-app .service-card label{font-size:13.5px;font-weight:500;cursor:pointer;}
+#siti-app .service-card{cursor:pointer;}
+
+/* ---------- Repeatable items ---------- */
+#siti-app .qty-group{display:flex;flex-direction:column;gap:8px;}
+#siti-app .qty-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#siti-app .qty-row .chip-check{flex:0 0 auto;}
+#siti-app .qty-input{width:100px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:7px 9px;font-size:13.5px;border-radius:0;}
+
+#siti-app .other-text-input{width:100%;margin-top:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 11px;font-size:14.5px;border-radius:0;font-family:inherit;}
+
+#siti-app .rep-list{margin-top:10px;}
+#siti-app .rep-item{border:1px solid var(--border);padding:13px;margin-bottom:10px;background:var(--surface-alt);position:relative;}
+#siti-app .rep-item .rep-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+#siti-app .rep-item .rep-head strong{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);}
+#siti-app .rep-remove{border:none;background:none;color:var(--danger);font-size:12.5px;text-decoration:underline;padding:6px 4px;}
+#siti-app .add-item{margin-top:4px;}
+
+/* ---------- Sticky action bar (form) ---------- */
+#siti-app .action-bar{
+  position:sticky;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);
+  padding:12px 16px;display:flex;gap:10px;z-index:15;
+}
+#siti-app .action-bar .btn{flex:1;}
+
+/* ---------- Toast ---------- */
+#siti-app .toast{
+  position:fixed;left:50%;bottom:90px;transform:translateX(-50%);
+  background:var(--btn-primary-bg);color:var(--btn-primary-text);padding:10px 18px;font-size:13.5px;z-index:60;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+}
+#siti-app .toast.show{opacity:1;}
+#siti-app .toast.err{background:var(--danger);color:#fff;}
+
+/* ---------- Summary / print view ---------- */
+#siti-app .summary-header{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:2px solid var(--text);margin-bottom:18px;}
+#siti-app .summary-header img{height:56px;object-fit:contain;}
+#siti-app .summary-header .doc-title{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:4px;}
+#siti-app dl.spec{display:grid;grid-template-columns:170px 1fr;gap:6px 12px;margin:0;font-size:14px;}
+#siti-app dl.spec dt{color:var(--text-muted);}
+#siti-app dl.spec dd{margin:0;font-weight:500;}
+#siti-app .summary-services-chips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 22px;}
+#siti-app .summary-service{margin-bottom:26px;}
+#siti-app .summary-service h3{font-size:14px;text-transform:uppercase;letter-spacing:.05em;padding-bottom:6px;border-bottom:1px solid var(--text);margin-bottom:12px;break-after:avoid;}
+#siti-app .summary-item-list{margin-top:12px;display:flex;flex-direction:column;gap:12px;}
+#siti-app .summary-item{border:1px solid var(--border);background:var(--surface-alt);padding:13px 15px;page-break-inside:avoid;position:relative;}
+#siti-app .summary-item-title{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--green-strong);font-weight:700;margin-bottom:8px;}
+#siti-app .summary-item dl.spec{grid-template-columns:150px 1fr;font-size:13.5px;background:transparent;}
+#siti-app .summary-subdetail{margin-top:10px;padding-top:9px;border-top:1px dashed var(--border);font-size:13px;color:var(--text-muted);}
+#siti-app .summary-subdetail strong{color:var(--text);}
+#siti-app .summary-empty-note{font-size:12.5px;color:var(--text-faint);font-style:italic;}
+#siti-app .summary-footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text-faint);}
+
+#siti-app .siti-confirm-overlay{
+  position:fixed;inset:0;background:var(--overlay);display:flex;align-items:center;justify-content:center;
+  z-index:100;padding:20px;
+}
+#siti-app .siti-confirm-box{
+  background:var(--surface);max-width:340px;width:100%;padding:20px;border:1px solid var(--border);
+}
+#siti-app .siti-confirm-box p{font-size:14.5px;margin:0 0 16px;}
+#siti-app .siti-confirm-actions{display:flex;gap:10px;}
+#siti-app .siti-confirm-actions .btn{flex:1;padding:9px 12px;font-size:13.5px;}
+
+@media print{
+  #siti-app .noprint{display:none !important;}
+  #siti-app .topbar{position:static;}
+  #siti-app main{padding:0;}
+  #siti-app{max-width:none;}
+  #siti-app .summary-item{break-inside:avoid;}
+}
+@media (prefers-reduced-motion: reduce){
+  #siti-app *{transition:none !important;}
+}

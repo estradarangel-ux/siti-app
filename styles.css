@@ -1,0 +1,121 @@
+/* =========================================================================
+   SITI · Comunicaciones — App unificada
+   Tokens de diseño compartidos (paleta verde SITI, tomada de Levantamiento)
+   ========================================================================= */
+:root{
+  --bg:#ffffff;
+  --surface:#ffffff;
+  --surface-alt:#f4f6f3;
+  --text:#181c18;
+  --text-muted:#5c6659;
+  --text-faint:#8a9385;
+  --border:#dbe2d8;
+  --green:#58AD50;
+  --green-strong:#356b30;
+  --green-tint:#eef6ec;
+  --danger:#a33a2f;
+  --btn-primary-bg:#181c18;
+  --btn-primary-text:#ffffff;
+  --overlay:rgba(20,24,19,.55);
+  --topbar-bg:rgba(255,255,255,.96);
+  color-scheme: light;
+}
+:root[data-theme="dark"]{
+  --bg:#14170f;
+  --surface:#1c2016;
+  --surface-alt:#242a1b;
+  --text:#eef1e9;
+  --text-muted:#a3ac9a;
+  --text-faint:#7b8471;
+  --border:#333a2b;
+  --green:#7bc873;
+  --green-strong:#a8dea1;
+  --green-tint:#1f2e19;
+  --danger:#e2685a;
+  --btn-primary-bg:var(--green);
+  --btn-primary-text:#10150c;
+  --overlay:rgba(0,0,0,.65);
+  --topbar-bg:rgba(20,23,15,.92);
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+  color:var(--text);
+  background:var(--bg);
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+.disp{font-family:'Space Grotesk','Inter',system-ui,sans-serif;}
+h1,h2,h3{font-family:'Space Grotesk','Inter',system-ui,sans-serif;margin:0;font-weight:700;}
+button{font-family:inherit;cursor:pointer;}
+::selection{background:var(--green);color:#fff;}
+
+/* ---------- Botones compartidos (login, shell) ---------- */
+.btn{
+  border:1px solid var(--btn-primary-bg);background:var(--btn-primary-bg);color:var(--btn-primary-text);
+  padding:11px 18px;font-size:14px;font-weight:600;letter-spacing:.01em;
+  border-radius:0;transition:background .15s,color .15s,border-color .15s;
+}
+.btn:hover{background:var(--green-strong);border-color:var(--green-strong);}
+.btn.secondary{background:transparent;color:var(--text);border-color:var(--btn-primary-bg);}
+.btn.secondary:hover{background:var(--surface-alt);}
+.btn.ghost{background:transparent;border-color:var(--border);color:var(--text-muted);}
+.btn.ghost:hover{border-color:var(--text);color:var(--text);}
+.btn.danger{background:transparent;border-color:var(--danger);color:var(--danger);}
+.btn.danger:hover{background:var(--danger);color:#fff;}
+.btn.block{width:100%;}
+.btn:focus-visible, input:focus-visible, select:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+.field{display:block;margin-bottom:14px;}
+.field span{display:block;font-size:12.5px;color:var(--text-muted);margin-bottom:5px;font-weight:500;}
+input[type=text],input[type=number],input[type=email],input[type=password]{
+  width:100%;border:1px solid var(--border);background:var(--surface);padding:10px 11px;font-size:14.5px;color:var(--text);
+  border-radius:0;font-family:inherit;
+}
+
+/* =========================================================================
+   Shell de la app: topbar + pestañas
+   ========================================================================= */
+#app-shell{max-width:1180px;margin:0 auto;}
+
+.app-topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--topbar-bg);backdrop-filter:blur(4px);z-index:30;
+}
+.app-topbar img{height:34px;width:34px;object-fit:contain;flex:0 0 auto;}
+.app-topbar .word{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);}
+.app-topbar .brand-title{font-size:15px;letter-spacing:.02em;}
+.app-topbar-actions{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+.app-theme-toggle{padding:7px 11px;font-size:12px;white-space:nowrap;}
+
+.app-tabbar{
+  display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);
+  position:sticky;top:63px;z-index:25;overflow-x:auto;
+}
+.app-tab{
+  flex:1;min-width:130px;text-align:center;padding:13px 10px;font-size:13px;font-weight:600;
+  letter-spacing:.02em;color:var(--text-muted);background:transparent;border:none;
+  border-bottom:2px solid transparent;white-space:nowrap;
+}
+.app-tab:hover{color:var(--text);}
+.app-tab.active{color:var(--text);border-bottom-color:var(--green);}
+.app-tab-panel{display:none;}
+.app-tab-panel.active{display:block;}
+
+@media print{
+  .app-topbar, .app-tabbar, .noprint{display:none !important;}
+}
+
+/* =========================================================================
+   Pantalla de acceso (login) — antes de entrar a las herramientas
+   ========================================================================= */
+#app-gate{max-width:360px;margin:60px auto;padding:0 16px;}
+#app-gate .gate-logo{height:52px;display:block;margin:0 auto 18px;}
+#app-gate h2{font-size:19px;margin-bottom:4px;text-align:center;}
+#app-gate p.hint{font-size:13px;color:var(--text-muted);margin-bottom:18px;text-align:center;}
+#app-gate .err{color:var(--danger);font-size:13px;display:none;margin-bottom:10px;}
+#app-gate .btn{margin-bottom:10px;}
+#app-loading{max-width:360px;margin:60px auto;text-align:center;color:var(--text-faint);font-size:14px;}

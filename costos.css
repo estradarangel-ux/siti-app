@@ -1,0 +1,176 @@
+/* Costos de Mano de Obra — estilos escopados bajo #costos-app, homologados a la paleta verde SITI */
+#costos-app {
+    /* Paleta homologada con Levantamiento en Sitio (verde SITI) */
+    --navy:#181c18;
+    --green:#58AD50;
+    --blue1:#356b30;
+    --blue2:#58AD50;
+    --blue3:#cfe6ca;
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-alt:#f4f6f3;
+    --line:#dbe2d8;
+    --muted:#5c6659;
+    --ink:#181c18;
+    --amber-bg:#FFF6DA;
+    --amber-ink:#6B4E00;
+    --amber-line:#E8D48A;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+#costos-app * {box-sizing:border-box}
+#costos-app,
+#costos-app {margin:0;padding:0}
+#costos-app {background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+#costos-app [hidden] {display:none !important}
+#costos-app .app {max-width:920px;margin:0 auto;padding:20px 16px 60px}
+#costos-app .topbar {display:flex;align-items:center;gap:14px;padding:8px 0 20px;border-bottom:3px solid var(--navy);margin-bottom:20px}
+#costos-app .topbar .logo {height:48px;width:auto;flex-shrink:0}
+#costos-app .topbar .titles {flex:1}
+#costos-app .topbar .titles h1 {margin:0;font-size:19px;font-weight:700;color:var(--navy);letter-spacing:.01em}
+#costos-app .topbar .titles .subtitle {margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+#costos-app .btn-admin {
+    font-family:inherit;font-size:12px;font-weight:700;padding:8px 12px;border-radius:0;
+    border:1.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;white-space:nowrap;
+    display:flex;align-items:center;gap:6px;
+  }
+#costos-app .btn-admin:hover {border-color:var(--navy);color:var(--navy)}
+#costos-app .btn-admin.activo {background:var(--amber-bg);border-color:var(--amber-line);color:var(--amber-ink)}
+#costos-app .panel {background:var(--panel);border:1px solid var(--line);border-radius:0;padding:16px 18px;margin-bottom:16px}
+#costos-app .panel h2 {margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);font-weight:700}
+#costos-app .panel-header {display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+#costos-app .panel-header h2 {margin:0}
+#costos-app .panel.admin-panel {background:var(--amber-bg);border-color:var(--amber-line)}
+#costos-app .panel.admin-panel h2 {color:var(--amber-ink)}
+#costos-app .grid-datos {display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+#costos-app .grid-datos label {display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+#costos-app .grid-datos input {font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:0;background:var(--panel-alt);color:var(--ink)}
+#costos-app .grid-datos input:focus {outline:2px solid var(--blue1);outline-offset:0;border-color:var(--blue1)}
+#costos-app .tipo-cliente {display:flex;gap:10px;flex-wrap:wrap}
+#costos-app .tipo-op {flex:1;min-width:140px}
+#costos-app .tipo-op input {position:absolute;opacity:0;width:0;height:0}
+#costos-app .tipo-op label {
+    display:block;text-align:center;padding:12px 10px;border:1.5px solid var(--line);border-radius:0;
+    font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer;background:var(--panel-alt);
+  }
+#costos-app .tipo-op input:checked + label {border-color:var(--blue1);background:var(--blue1);color:#fff}
+#costos-app .tipo-op label:hover {border-color:var(--blue1)}
+#costos-app .btn-link {background:none;border:none;color:var(--blue1);font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;text-decoration:underline;text-underline-offset:2px}
+#costos-app .btn-link:hover {color:var(--navy)}
+#costos-app .admin-panel .btn-link {color:var(--amber-ink)}
+#costos-app .tabla-wrap {overflow-x:auto}
+#costos-app table.tabla-partidas {width:100%;border-collapse:collapse;font-size:13.5px}
+#costos-app table.tabla-partidas thead th {font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:2px solid var(--navy);white-space:nowrap}
+#costos-app table.tabla-partidas td {padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+#costos-app table.tabla-partidas td.nombre {font-weight:600;color:var(--ink)}
+#costos-app table.tabla-partidas td.unidad {color:var(--muted);white-space:nowrap;font-size:12.5px}
+#costos-app table.tabla-partidas td.num,
+#costos-app table.tabla-partidas th.num {text-align:right}
+#costos-app table.tabla-partidas td.importe {font-family:var(--mono);font-weight:700;text-align:right;white-space:nowrap;color:var(--navy)}
+#costos-app table.tabla-partidas td.readonly-precio {font-family:var(--mono);text-align:right;color:var(--muted)}
+#costos-app .inp-precio,
+#costos-app .inp-cant,
+#costos-app .inp-pct {
+    width:100%;min-width:76px;font-family:var(--mono);font-size:13.5px;text-align:right;
+    padding:6px 7px;border:1px solid var(--line);border-radius:0;background:var(--panel-alt);color:var(--ink);
+  }
+#costos-app .admin-panel .inp-precio {background:#FFFDF5;border-color:var(--amber-line)}
+#costos-app .inp-precio:focus,
+#costos-app .inp-cant:focus,
+#costos-app .inp-pct:focus {outline:2px solid var(--blue1);outline-offset:0;border-color:var(--blue1)}
+#costos-app .cant-cell {width:90px}
+#costos-app .precio-cell {width:110px}
+#costos-app .nota {font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+#costos-app .margenes-row {display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px}
+#costos-app .margenes-row label {display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--amber-ink);font-weight:600}
+#costos-app .margenes-row .inp-pct {width:90px}
+#costos-app .costo-hora-box {background:var(--navy);color:#fff;padding:12px 16px;border-radius:0;font-size:13.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:6px}
+#costos-app .costo-hora-box span {font-family:var(--mono);font-size:20px}
+#costos-app .inp-tiempo {width:52px;font-family:var(--mono);font-size:13.5px;text-align:right;padding:6px 5px;border:1px solid var(--amber-line);border-radius:0;background:#FFFDF5;color:var(--ink)}
+#costos-app .tiempo-inputs {display:flex;align-items:center;gap:4px;justify-content:flex-end;flex-wrap:nowrap}
+#costos-app .tiempo-suffix {font-size:11.5px;color:var(--muted);margin-right:6px}
+#costos-app .margen-pos {color:#2E7D32;font-weight:700}
+#costos-app .margen-baja {color:#B26A00;font-weight:700}
+#costos-app .margen-neg {color:#C62828;font-weight:700}
+#costos-app .margen-na {color:var(--muted)}
+#costos-app .btn-del {background:none;border:none;color:#C62828;cursor:pointer;font-size:15px;padding:2px 8px;line-height:1}
+#costos-app .btn-del:hover {opacity:.7}
+#costos-app .inp-gasto-nombre {width:100%;min-width:120px;font-family:inherit;font-size:13.5px;padding:6px 7px;border:1px solid var(--amber-line);border-radius:0;background:#FFFDF5;color:var(--ink)}
+#costos-app .total-panel {background:var(--navy);border-color:var(--navy)}
+#costos-app .total-row {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+#costos-app .total-row .lbl {display:flex;flex-direction:column;gap:2px}
+#costos-app .total-row .lbl span:first-child {font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue3);font-weight:700}
+#costos-app .total-row .lbl span.tipo-tag {font-size:11.5px;color:#fff;opacity:.75}
+#costos-app .total-row .monto {font-family:var(--mono);font-size:24px;font-weight:800;color:#fff}
+#costos-app .monto-wrap {display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#costos-app .btn-copy {
+    background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.4);color:#fff;
+    border-radius:0;padding:8px 11px;cursor:pointer;font-size:15px;line-height:1;
+    display:flex;align-items:center;gap:6px;font-family:inherit;font-weight:700;
+  }
+#costos-app .btn-copy:hover {background:rgba(255,255,255,.24)}
+#costos-app .btn-copy:active {transform:scale(.96)}
+#costos-app .acciones {display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+#costos-app .btn {font-family:inherit;font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:0;border:1.5px solid transparent;cursor:pointer}
+#costos-app .btn-primary {background:var(--green);color:#fff}
+#costos-app .btn-primary:hover {background:#4c9642}
+#costos-app .btn-secondary {background:#fff;color:var(--navy);border-color:var(--line)}
+#costos-app .btn-secondary:hover {border-color:var(--navy)}
+#costos-app .btn-generar {background:var(--blue1);color:#fff;width:100%;margin-top:14px;padding:13px}
+#costos-app .btn-generar:hover {background:var(--navy)}
+#costos-app .modal-overlay {position:fixed;inset:0;background:rgba(10,37,64,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+#costos-app .modal-box {background:#fff;border-radius:0;padding:20px;max-width:340px;width:100%}
+#costos-app .modal-box p {margin:0 0 14px;font-size:14px;color:var(--ink);line-height:1.5}
+#costos-app .modal-box input[type=password],
+#costos-app .modal-box input[type=text] {
+    width:100%;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:0;
+    margin-bottom:10px;font-family:var(--mono);letter-spacing:2px;background:var(--panel-alt);color:var(--ink);
+  }
+#costos-app .modal-actions {display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+#costos-app .toast {position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);background:var(--navy);color:#fff;padding:10px 18px;border-radius:0;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:60}
+#costos-app .toast.show {opacity:1;transform:translateX(-50%) translateY(0)}
+
+
+  @media (max-width:640px){#costos-app .grid-datos {grid-template-columns:1fr}
+#costos-app .margenes-row {flex-direction:column;gap:10px}
+#costos-app table.tabla-partidas thead {display:none}
+#costos-app table.tabla-partidas,
+#costos-app table.tabla-partidas tbody,
+#costos-app table.tabla-partidas tr,
+#costos-app table.tabla-partidas td {display:block;width:100%}
+#costos-app table.tabla-partidas tr {border:1px solid var(--line);border-radius:0;padding:10px 12px;margin-bottom:10px}
+#costos-app table.tabla-partidas td {border-bottom:none;padding:5px 0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+#costos-app table.tabla-partidas td.nombre {padding-bottom:8px;border-bottom:1px dashed var(--line);margin-bottom:4px;display:block}
+#costos-app table.tabla-partidas td.unidad::before {content:'Unidad';font-size:11px;color:var(--muted);font-weight:600}
+#costos-app table.tabla-partidas td.precio-cell::before {content:'Precio público';font-size:11px;color:var(--muted);font-weight:600}
+#costos-app table.tabla-partidas td.cant-cell::before {content:'Cantidad';font-size:11px;color:var(--muted);font-weight:600}
+#costos-app table.tabla-partidas td.importe::before {content:'Importe';font-size:11px;color:var(--muted);font-weight:600}
+#costos-app table.tabla-partidas td.readonly-precio::before {content:attr(data-label);font-size:11px;color:var(--muted);font-weight:600}
+#costos-app table.tabla-partidas td[data-label]::before {content:attr(data-label);font-size:11px;color:var(--muted);font-weight:600}
+#costos-app .inp-precio,
+#costos-app .inp-cant {width:120px}
+#costos-app .total-row .monto {font-size:20px}
+
+  }
+
+  @media print{
+    @page{ margin:12mm; }#costos-app {background:#fff;font-size:12px}
+#costos-app .no-print {display:none !important}
+#costos-app .app {max-width:100%;padding:0}
+#costos-app .topbar {padding:0 0 8px;margin-bottom:10px}
+#costos-app .topbar .logo {height:38px}
+#costos-app .topbar .titles h1 {font-size:16px}
+#costos-app .panel {border:none;padding:5px 0;margin-bottom:5px}
+#costos-app .panel h2 {font-size:11px;margin-bottom:6px}
+#costos-app .grid-datos {gap:4px 16px}
+#costos-app .grid-datos input {padding:3px 0;background:transparent;border:none;font-size:12.5px}
+#costos-app table.tabla-partidas {font-size:12px}
+#costos-app table.tabla-partidas td,
+#costos-app table.tabla-partidas thead th {padding:4px 6px}
+#costos-app .total-panel {background:#fff;border-top:2px solid var(--navy);border-radius:0;padding-top:8px;page-break-inside:avoid}
+#costos-app .total-row .lbl span:first-child,
+#costos-app .total-row .lbl span.tipo-tag {color:var(--navy);opacity:1}
+#costos-app .total-row .monto {color:var(--navy);font-size:18px}
+#costos-app table.tabla-partidas tr {page-break-inside:avoid}
+
+  }

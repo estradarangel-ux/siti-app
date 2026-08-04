@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SITI · Comunicaciones</title>
+<meta name="description" content="Levantamiento en sitio, calculadora de material eléctrico y costos de mano de obra — SITI Comunicaciones">
+<meta name="theme-color" content="#181c18">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SITI">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="levantamiento.css">
+<link rel="stylesheet" href="calculadora.css">
+<link rel="stylesheet" href="costos.css">
+</head>
+<body>
+<script>window.SITI = window.SITI || {currentUser:null, backend:null};</script>
+
+<div id="app-shell">
+
+  <div class="app-topbar">
+    <img id="siti-icon" alt="SITI">
+    <div>
+      <div class="brand-title disp">SITI · Comunicaciones</div>
+      <div class="word">Herramientas de campo</div>
+    </div>
+    <div class="app-topbar-actions">
+      <button type="button" class="btn ghost app-theme-toggle" id="siti-theme-toggle">Modo oscuro</button>
+      <div id="siti-userbar"></div>
+    </div>
+  </div>
+
+  <nav class="app-tabbar" id="app-tabbar" hidden>
+    <button type="button" class="app-tab active" data-tab="levantamiento">Levantamiento en sitio</button>
+    <button type="button" class="app-tab" data-tab="calculadora">Calculadora de material</button>
+    <button type="button" class="app-tab" data-tab="costos">Costos de mano de obra</button>
+  </nav>
+
+  <div class="app-tab-panel active" id="tab-levantamiento" data-panel="levantamiento">
+<div id="siti-app">
+<div class="storage-note" id="siti-storage-note">Estos levantamientos se guardan compartidos: cualquier persona con acceso a esta app puede verlos y editarlos.</div>
+<main id="siti-main"></main>
+<div class="toast" id="siti-toast"></div>
+</div>
+  </div>
+
+  <div class="app-tab-panel" id="tab-calculadora" data-panel="calculadora">
+<div id="calc-app">
+<div class="wrap">
+<p class="no-print" style="font-size:13px;color:var(--muted);margin:0 0 16px;">Conduit (galvanizada delgada / gruesa / PVC, ½"–2") y escalerilla Charofil (50–300 mm). Captura por área con montaje aéreo o por pared, soportería desglosada por área, y claves y precios de syscom.mx editables que se guardan para futuros casos, con costo estimado de compra.</p>
+
+  <div class="layout">
+    <!-- ==================== CAPTURA ==================== -->
+    <section class="card no-print">
+      <h2>Captura de tramos</h2>
+
+      <div class="field">
+        <label for="obra">Obra / proyecto (aparece en el vale)</label>
+        <input id="obra" type="text" placeholder="Ej. Nave 3 · Planta León">
+      </div>
+
+      <details class="params">
+        <summary>Parámetros y catálogo de claves</summary>
+        <h5>Generales</h5>
+        <div class="grid2">
+          <div class="field"><label for="pDesp">Desperdicio (%)</label>
+            <input id="pDesp" type="number" step="1" min="0" max="50" value="5"></div>
+          <div class="field"><label for="pLargo">Largo tubo conduit (m)</label>
+            <input id="pLargo" type="number" step="0.01" min="1" value="3.05"></div>
+          <div class="field"><label for="pSep">Separación soportes conduit (m)</label>
+            <input id="pSep" type="number" step="0.1" min="0.3" value="1.5"></div>
+          <div class="field"><label for="pEspC">Ø espárrago p/ conduit</label>
+            <select id="pEspC"><option value='1/4"' selected>¼" (6.4 mm)</option>
+              <option value='3/8"'>⅜" (9.5 mm)</option></select></div>
+        </div>
+        <h5>Escalerilla Charofil</h5>
+        <div class="grid2">
+          <div class="field"><label for="pLargoCh">Largo de tramo (m)</label>
+            <input id="pLargoCh" type="number" step="0.5" min="1" value="3"></div>
+          <div class="field"><label for="pSepCh">Separación soportes (m)</label>
+            <input id="pSepCh" type="number" step="0.1" min="0.5" value="1.5"></div>
+          <div class="field"><label for="pUni">Uniones rápidas por empalme</label>
+            <input id="pUni" type="number" step="1" min="1" value="2"></div>
+          <div class="field"><label for="pClemas">Kits de clema por soporte</label>
+            <input id="pClemas" type="number" step="1" min="1" value="2"></div>
+          <div class="field"><label for="pEspCh">Ø espárrago p/ charola</label>
+            <select id="pEspCh"><option value='1/4"'>¼" (6.4 mm)</option>
+              <option value='3/8"' selected>⅜" (9.5 mm)</option></select></div>
+        </div>
+        <h5>Largos comerciales</h5>
+        <div class="grid2">
+          <div class="field"><label for="pLargoUni">Tramo de unicanal (m)</label>
+            <input id="pLargoUni" type="number" step="0.05" min="1" value="3.05"></div>
+          <div class="field"><label for="pLargoVar">Tramo de varilla roscada (m)</label>
+            <input id="pLargoVar" type="number" step="0.5" min="1" value="3"></div>
+        </div>
+        <h5>Catálogo de claves Syscom</h5>
+        <p class="hint" style="margin-top:0">Toca cualquier clave del vale para corregirla o asignarla, y toca cualquier precio de la tabla de costos para capturarlo. Claves y precios se guardan en este dispositivo y se reutilizan en futuros casos. Compártelos con tu cuadrilla exportando el catálogo.</p>
+        <div class="acciones" style="margin-top:8px">
+          <button class="btn-ghost" type="button" id="btnExpCat">Exportar catálogo</button>
+          <button class="btn-ghost" type="button" id="btnImpCat">Importar catálogo</button>
+          <button class="btn-ghost" type="button" id="btnResetCat" style="color:var(--danger)">Restaurar originales</button>
+          <input type="file" id="fileCat" accept="application/json" hidden>
+        </div>
+        <p class="hint" id="catStatus"></p>
+      </details>
+
+      <div class="sistema" role="tablist" aria-label="Sistema a capturar">
+        <button type="button" id="tabC" class="on" role="tab" aria-selected="true">Tubería conduit</button>
+        <button type="button" id="tabCH" role="tab" aria-selected="false">Escalerilla Charofil</button>
+      </div>
+
+      <div class="field">
+        <label for="tArea">Área o sección</label>
+        <input id="tArea" type="text" placeholder="Ej. Nivel 1 · Alumbrado oficinas">
+      </div>
+
+      <!-- Campos conduit -->
+      <div id="formC">
+        <div class="grid2">
+          <div class="field"><label for="tTipo">Tipo de tubería</label>
+            <select id="tTipo">
+              <option value="GD">Galvanizada pared delgada</option>
+              <option value="GG">Galvanizada pared gruesa</option>
+              <option value="PVC">PVC conduit pesado</option>
+              <option value="C40">PVC cédula 40</option>
+            </select></div>
+          <div class="field"><label for="tDiam">Diámetro</label>
+            <select id="tDiam">
+              <option>½" (13 mm)</option><option>¾" (19 mm)</option>
+              <option>1" (25 mm)</option><option>1¼" (32 mm)</option>
+              <option>1½" (38 mm)</option><option>2" (51 mm)</option>
+            </select></div>
+        </div>
+        <div class="field"><label for="tSujecion">Sujeción / abrazadera</label>
+          <select id="tSujecion">
+            <option value="una">Abrazadera uña (pija y taquete al muro)</option>
+            <option value="omega">Abrazadera omega (pija y taquete al muro)</option>
+            <option value="clip">Abrazadera clip (pija y taquete al muro)</option>
+            <option value="uni">Trapecio de unicanal (aéreo, con espárragos)</option>
+          </select></div>
+        <div class="grid2" id="uniFieldsC" hidden>
+          <div class="field"><label for="tUniMedida">Medida de la unicanal</label>
+            <select id="tUniMedida">
+              <option value="4x2T">4x2 cm troquelada (perforada)</option>
+              <option value="4x2L">4x2 cm lisa</option>
+              <option value="4x4T">4x4 cm troquelada (perforada)</option>
+              <option value="4x4L">4x4 cm lisa</option>
+            </select></div>
+          <div class="field"><label for="tUniLargo">Largo de unicanal por soporte (m)</label>
+            <input id="tUniLargo" type="number" step="0.05" min="0.05" value="0.30" inputmode="decimal"></div>
+        </div>
+        <div class="grid2" id="espFieldC" hidden>
+          <div class="field"><label for="tEspLargo">Largo promedio de espárrago (m)</label>
+            <input id="tEspLargo" type="number" step="0.05" min="0.05" value="0.40" inputmode="decimal"></div>
+        </div>
+        <div class="grid3">
+          <div class="field"><label for="tMetros">Metros lineales</label>
+            <input id="tMetros" type="number" step="0.1" min="0" placeholder="0.0" inputmode="decimal"></div>
+          <div class="field"><label for="tSalidas">Salidas a caja</label>
+            <input id="tSalidas" type="number" step="1" min="0" placeholder="0" inputmode="numeric"></div>
+          <div class="field"><label for="tCodos">Codos 90°</label>
+            <input id="tCodos" type="number" step="1" min="0" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field">
+          <label>Registros, tapas y condulets (opcional)</label>
+          <div id="accList"></div>
+          <button type="button" class="btn-ghost" id="btnAddAcc" style="width:100%">+ Agregar registro / tapa / condulet</button>
+        </div>
+        <p class="hint">Trapecio de unicanal: 2 espárragos por soporte (cada uno con ancla, 2 tuercas y 2 rondanas) más la unicanal indicada. Uña y clip: 1 pija + 1 taquete por soporte; omega: 2. El condulet toma el diámetro del tramo; el registro/caja es independiente del diámetro.</p>
+      </div>
+
+      <!-- Campos charofil -->
+      <div id="formCH" hidden>
+        <div class="grid2">
+          <div class="field"><label for="cAncho">Ancho de escalerilla</label>
+            <select id="cAncho">
+              <option>50 mm</option><option>100 mm</option><option>150 mm</option>
+              <option selected>200 mm</option><option>300 mm</option>
+            </select></div>
+          <div class="field"><label for="cMetros">Metros lineales</label>
+            <input id="cMetros" type="number" step="0.1" min="0" placeholder="0.0" inputmode="decimal"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="cMontaje">¿La instalación es aérea o por pared?</label>
+            <select id="cMontaje">
+              <option value="A">Aérea (trapecio colgado)</option>
+              <option value="P">Por pared / muro</option>
+            </select></div>
+          <div class="field"><label for="cUniMedida">Medida de la unicanal</label>
+            <select id="cUniMedida">
+              <option value="4x2T">4x2 cm troquelada (perforada)</option>
+              <option value="4x2L">4x2 cm lisa</option>
+              <option value="4x4T" selected>4x4 cm troquelada (perforada)</option>
+              <option value="4x4L">4x4 cm lisa</option>
+            </select></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="cUniLargo">Largo de unicanal por soporte (m)</label>
+            <input id="cUniLargo" type="number" step="0.05" min="0.05" placeholder="Auto: ancho + 15 cm" inputmode="decimal"></div>
+          <div class="field" id="espFieldCH"><label for="cEspLargo">Largo promedio de espárrago (m)</label>
+            <input id="cEspLargo" type="number" step="0.05" min="0.05" value="0.40" inputmode="decimal"></div>
+        </div>
+        <p class="hint">Aérea: trapecio de unicanal con 2 espárragos por soporte (ancla, 2 tuercas y 2 rondanas c/u). Por pared: la unicanal se fija con 2 anclas por soporte. Uniones rápidas y kits de clema se calculan con los parámetros.</p>
+      </div>
+
+      <button class="btn-main" id="btnAdd" type="button">+ Agregar tramo</button>
+
+      <h2 style="margin-top:18px">Tramos capturados</h2>
+      <div id="listaTramos"></div>
+    </section>
+
+    <!-- ==================== RESUMEN / VALE ==================== -->
+    <section class="card" id="seccionVale">
+      <h2 class="no-print">Lista de material</h2>
+      <div class="ticket" id="ticket">
+        <div class="ticket-head">
+          <img class="vale-logo" src="data:image/png;base64,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" alt="SITI">
+          <h3>Vale de material · Instalación eléctrica</h3>
+          <span class="folio" id="folio"></span>
+        </div>
+        <div id="ticketBody"></div>
+      </div>
+      <div class="acciones no-print">
+        <button class="btn-ghost" type="button" id="btnCopiar">Copiar lista</button>
+        <button class="btn-ghost" type="button" id="btnCotizar" style="border-color:var(--ink);border-width:2px">Copiar p/ cotizar</button>
+        <button class="btn-ghost" type="button" id="btnCSV">Descargar CSV</button>
+        <button class="btn-ghost" type="button" id="btnPrint">Imprimir / PDF</button>
+        <button class="btn-ghost" type="button" id="btnLimpiar" style="color:var(--danger)">Borrar todo</button>
+      </div>
+      <p class="nota no-print">Los tramos capturados viven solo en esta sesión (descarga el CSV o imprime antes de cerrar); las claves y los precios capturados sí se guardan en el dispositivo. Cantidades estimadas: verificar contra plano y existencias.</p>
+    </section>
+  </div>
+</div>
+
+</div>
+  </div>
+
+  <div class="app-tab-panel" id="tab-costos" data-panel="costos">
+<div id="costos-app">
+<div class="app">
+
+  <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+    <button type="button" class="btn-admin no-print" id="btnAdminToggle">Modo administrador</button>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <section class="panel admin-panel no-print" id="panelAdmin" hidden>
+    <div class="panel-header">
+      <h2>Panel de administración</h2>
+      <button type="button" class="btn-link" id="btnCerrarAdmin">Cerrar modo administrador</button>
+    </div>
+
+    <div class="margenes-row">
+      <label>Margen vendedores (%)
+        <input type="number" class="inp-pct" id="fMargenVendedor" min="0" max="95" step="0.1">
+      </label>
+      <label>Descuento revendedores (%)
+        <input type="number" class="inp-pct" id="fDescRevendedor" min="0" max="95" step="0.1">
+      </label>
+    </div>
+
+    <div class="panel-header" style="margin-top:6px">
+      <h2 style="font-size:12px">Gastos fijos mensuales</h2>
+      <button type="button" class="btn-link" id="btnAgregarGasto">+ Agregar gasto fijo</button>
+    </div>
+    <div class="tabla-wrap">
+      <table class="tabla-partidas">
+        <thead>
+          <tr><th>Gasto fijo mensual</th><th class="num">Monto</th><th></th></tr>
+        </thead>
+        <tbody id="tbodyGastos"></tbody>
+      </table>
+    </div>
+
+    <div class="margenes-row" style="margin-top:14px">
+      <label>Técnicos activos
+        <input type="number" class="inp-pct" id="fTecnicos" min="0" step="1">
+      </label>
+      <label>Horas/día por técnico
+        <input type="number" class="inp-pct" id="fHorasDia" min="0" step="0.5">
+      </label>
+      <label>Días laborables/mes
+        <input type="number" class="inp-pct" id="fDiasMes" min="0" step="1">
+      </label>
+      <label>Utilización real (%)
+        <input type="number" class="inp-pct" id="fUtilizacion" min="0" max="100" step="1">
+      </label>
+    </div>
+
+    <div class="costo-hora-box">
+      <span style="font-size:13px">Costo por hora-hombre</span>
+      <span id="costoHoraHombre">$0.00</span>
+    </div>
+
+    <div class="tabla-wrap" style="margin-top:14px">
+      <table class="tabla-partidas">
+        <thead>
+          <tr>
+            <th>Partida</th>
+            <th>Unidad</th>
+            <th class="num">Precio público</th>
+            <th class="num">Vendedor</th>
+            <th class="num">Revendedor</th>
+            <th class="num">Tiempo estimado</th>
+            <th class="num">Costo real</th>
+            <th class="num">Margen</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyAdmin"></tbody>
+      </table>
+    </div>
+    <p class="nota">Nota: "Tubo P.D. / Canaleta" y "Canaleta" están capturadas por separado tal como en tu lista original (mismo precio) — revisa si deben unificarse. Vendedor = Precio público ÷ (1 − margen). Revendedor = Precio público × (1 − descuento).</p>
+    <p class="nota">Captura cuánto tarda realmente cada partida en horas y minutos (ej. 1 h 30 min) para ver el Costo real y el Margen. Con 0 h 0 min esa partida se omite del análisis de costeo. Colores del margen: rojo = pérdida, ámbar = margen bajo, verde = saludable — ajusta el umbral a tu criterio.</p>
+    <button type="button" class="btn-link" id="btnResetPrecios" style="margin-top:8px">Restablecer precios públicos originales</button>
+  </section>
+
+  <!-- OPERADOR -->
+  <section class="panel no-print">
+    <h2>Tipo de cliente</h2>
+    <div class="tipo-cliente" id="tipoClienteGrupo">
+      <div class="tipo-op">
+        <input type="radio" name="tipoCliente" id="tcPublico" value="publico" checked>
+        <label for="tcPublico">Público</label>
+      </div>
+      <div class="tipo-op">
+        <input type="radio" name="tipoCliente" id="tcVendedor" value="vendedor">
+        <label for="tcVendedor">Vendedor</label>
+      </div>
+      <div class="tipo-op">
+        <input type="radio" name="tipoCliente" id="tcRevendedor" value="revendedor">
+        <label for="tcRevendedor">Revendedor</label>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Datos de la cotización</h2>
+    <div class="grid-datos">
+      <label>Cliente
+        <input type="text" id="fCliente" placeholder="Nombre del cliente">
+      </label>
+      <label>Proyecto / obra
+        <input type="text" id="fProyecto" placeholder="Ej. Sucursal Centro">
+      </label>
+      <label>Fecha
+        <input type="date" id="fFecha">
+      </label>
+      <label>Elaboró
+        <input type="text" id="fElaboro" placeholder="Nombre">
+      </label>
+    </div>
+  </section>
+
+  <section class="panel no-print">
+    <h2>Partidas</h2>
+    <div class="tabla-wrap">
+      <table class="tabla-partidas">
+        <thead>
+          <tr>
+            <th>Partida</th>
+            <th>Unidad</th>
+            <th class="num">Cantidad</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyPartidas"></tbody>
+      </table>
+    </div>
+    <button type="button" class="btn btn-generar" id="btnGenerar">Generar cotización</button>
+  </section>
+
+  <!-- RESULTADO -->
+  <section class="panel" id="panelResultado" hidden>
+    <h2>Resultado</h2>
+    <div class="tabla-wrap">
+      <table class="tabla-partidas">
+        <thead>
+          <tr>
+            <th>Partida</th>
+            <th>Unidad</th>
+            <th class="num">Precio unitario</th>
+            <th class="num">Cantidad</th>
+            <th class="num">Importe</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyResultado"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel total-panel" id="panelTotal" hidden>
+    <div class="total-row">
+      <div class="lbl">
+        <span>Total mano de obra</span>
+        <span class="tipo-tag" id="tipoTag">Precio público</span>
+      </div>
+      <div class="monto-wrap">
+        <span class="monto" id="totalGeneral">$0.00</span>
+        <button type="button" class="btn-copy no-print" id="btnCopiarTotal" title="Copiar total">📋 Copiar</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="acciones no-print">
+    <button type="button" class="btn btn-secondary" id="btnLimpiarCostos">Limpiar cotización</button>
+    <button type="button" class="btn btn-secondary" id="btnCSVCostos">Exportar CSV</button>
+    <button type="button" class="btn btn-primary" id="btnPDF">Exportar PDF</button>
+  </div>
+
+</div>
+
+<!-- Modal confirmación genérica -->
+<div class="modal-overlay no-print" id="modalOverlay" hidden>
+  <div class="modal-box">
+    <p id="modalMsg"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" id="modalCancel">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="modalOk">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast no-print" id="toast"></div>
+</div>
+  </div>
+
+</div>
+
+<script src="levantamiento.js" defer></script>
+<script src="calculadora.js" defer></script>
+<script src="costos.js" defer></script>
+<script src="app.js" defer></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
