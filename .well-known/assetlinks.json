@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.siticomunicaciones.app",
+    "sha256_cert_fingerprints": ["F5:F4:D9:E9:2F:E6:E4:ED:B7:D2:4D:D8:13:A9:4E:96:9C:E1:1C:F7:AD:FD:9D:A4:BA:32:C1:35:87:99:9D:F6"]
+  }
+}]
