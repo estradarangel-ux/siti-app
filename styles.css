@@ -95,6 +95,8 @@ input[type=text],input[type=number],input[type=email],input[type=password]{
   display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);
   position:sticky;top:63px;z-index:25;overflow-x:auto;
 }
+/* El atributo hidden debe ganarle al display:flex de arriba (barra oculta sin sesión). */
+.app-tabbar[hidden]{display:none;}
 .app-tab{
   flex:1;min-width:130px;text-align:center;padding:13px 10px;font-size:13px;font-weight:600;
   letter-spacing:.02em;color:var(--text-muted);background:transparent;border:none;

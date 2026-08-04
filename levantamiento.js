@@ -591,9 +591,10 @@ function renderAdmin(users){
       '<div class="meta">Alta: '+(u.createdAt ? new Date(u.createdAt).toLocaleDateString('es-MX') : '—')+'</div>'+
       '<div class="field-row" style="margin-top:10px;">'+
         '<label class="field"><span>Rol</span><select data-user-role="'+u.uid+'" '+(isSelf?'disabled':'')+'>'+
-          '<option value="tecnico" '+(u.role==='tecnico'?'selected':'')+'>Técnico</option>'+
+          '<option value="tecnico" '+(u.role==='tecnico'?'selected':'')+'>Usuario</option>'+
           '<option value="admin" '+(u.role==='admin'?'selected':'')+'>Administrador</option>'+
         '</select></label>'+
+        '<p class="hint" style="margin-top:2px;">Usuario: Levantamiento y Costos. Administrador: además la Calculadora de material.</p>'+
         '<label class="field"><span>Estado</span><select data-user-disabled="'+u.uid+'" '+(isSelf?'disabled':'')+'>'+
           '<option value="false" '+(!u.disabled?'selected':'')+'>Activo</option>'+
           '<option value="true" '+(u.disabled?'selected':'')+'>Deshabilitado</option>'+

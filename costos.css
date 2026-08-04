@@ -174,3 +174,38 @@
 #costos-app table.tabla-partidas tr {page-break-inside:avoid}
 
   }
+
+/* =========================================================================
+   MODO OSCURO — se activa con data-theme="dark" en <html> (toggle global).
+   --navy (near-black) se usaba como texto y como fondo de banners; aquí pasa
+   a texto claro y los banners se reasignan a superficies oscuras. El panel de
+   administración (ámbar claro) se convierte en ámbar oscuro legible.
+   ========================================================================= */
+:root[data-theme="dark"] #costos-app{
+  --navy:#eef1e9; --green:#7bc873; --blue1:#7bc873; --blue2:#7bc873; --blue3:#a8dea1;
+  --bg:#14170f; --panel:#1c2016; --panel-alt:#242a1b; --line:#333a2b;
+  --muted:#a3ac9a; --ink:#eef1e9;
+  --amber-bg:#2a2410; --amber-ink:#e8cf7a; --amber-line:#5c4f22;
+}
+/* Bordes que usaban --navy siguen legibles al volverse claros; banners de fondo: */
+:root[data-theme="dark"] #costos-app .costo-hora-box{background:#242a1b;color:var(--ink)}
+:root[data-theme="dark"] #costos-app .total-panel{background:#242a1b;border-color:var(--line)}
+:root[data-theme="dark"] #costos-app .toast{background:#242a1b;color:var(--ink)}
+:root[data-theme="dark"] #costos-app .btn-generar:hover{background:var(--blue1);color:#10150c}
+/* --blue1 ahora es verde brillante: los controles que lo usan de fondo llevan texto oscuro */
+:root[data-theme="dark"] #costos-app .tipo-op input:checked + label{background:var(--blue1);color:#10150c}
+:root[data-theme="dark"] #costos-app .btn-generar{background:var(--blue1);color:#10150c}
+:root[data-theme="dark"] #costos-app .btn-primary{color:#10150c}
+:root[data-theme="dark"] #costos-app .btn-primary:hover{background:var(--green)}
+/* Fondos blancos fijos → superficies oscuras */
+:root[data-theme="dark"] #costos-app .btn-admin{background:#242a1b}
+:root[data-theme="dark"] #costos-app .btn-secondary{background:#242a1b;color:var(--ink)}
+:root[data-theme="dark"] #costos-app .modal-box{background:var(--panel)}
+:root[data-theme="dark"] #costos-app .admin-panel .inp-precio,
+:root[data-theme="dark"] #costos-app .inp-tiempo,
+:root[data-theme="dark"] #costos-app .inp-gasto-nombre{background:#2e2913;color:var(--ink)}
+/* Colores semánticos de margen: más brillantes sobre fondo oscuro */
+:root[data-theme="dark"] #costos-app .margen-pos{color:#5cc264}
+:root[data-theme="dark"] #costos-app .margen-baja{color:#e0a53a}
+:root[data-theme="dark"] #costos-app .margen-neg{color:#e2685a}
+:root[data-theme="dark"] #costos-app .btn-del{color:#e2685a}

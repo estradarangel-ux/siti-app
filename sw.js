@@ -2,7 +2,7 @@
    Cachea el "app shell" (shell + las 3 herramientas) para que abra aunque
    no haya señal en sitio. Sube CACHE_NAME cada vez que actualices archivos
    para forzar que los dispositivos descarguen la versión nueva. */
-const CACHE_NAME = 'siti-app-v1';
+const CACHE_NAME = 'siti-app-v2';
 const APP_SHELL = [
   './',
   './index.html',
