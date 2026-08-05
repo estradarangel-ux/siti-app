@@ -1540,6 +1540,168 @@ function consBlockRight(b, r){
   var u = pluralUnit(r.count, b.unit);
   return r.count+' '+u + (r.m ? ' · '+fmtQty(r.m)+' m' : '');
 }
+
+/* ============ CATÁLOGO DE NÚMEROS DE PARTE (SysCom) + EXPORTACIÓN A ODOO ============
+   Claves capturadas por SITI. El material base se cotiza así:
+   - Cable de red / conductor / fibra: cantidad = metros.
+   - Canalización (tubo, canaleta, charola): cantidad = tramos = redondeo(metros ÷ largo).
+   Falta: accesorios por nodo (jack, placa, cordones, LOTEM) y mano de obra (manual). */
+var PARTES = {
+  cable: {
+    'STP Cat 6|Panduit':{clave:'PFL6004BU-G', desc:'Cable Blindado F/UTP 4 Pares Cat6 LSZH Azul Panduit'},
+    'STP Cat 6A|Panduit':{clave:'PFL6X04WH-CEG', desc:'Cable Blindado F/UTP 4 Pares Cat6A 10G LSZH Blanco Panduit'},
+    'UTP Cat 5e|Panduit':{clave:'PUC5C04IG-CE', desc:'Cable UTP Cat5e 24AWG CM Gris Panduit'},
+    'UTP Cat 5e|Netkey':{clave:'NUC5C04IG-ME', desc:'Cable UTP Cat5e 24AWG CM Gris Netkey'},
+    'UTP Cat 6|Panduit':{clave:'PUR6004IG-ME', desc:'Cable UTP TX6000 Cat6 23AWG CMR Gris Panduit'},
+    'UTP Cat 6|Netkey':{clave:'NUC6C04IG-ME', desc:'Cable UTP NetKey Cat6 24AWG CM Gris Netkey'},
+    'UTP Cat 6 Gel|Panduit':{clave:'PUO6C04BL-CEG', desc:'Cable UTP Ext c/Gel Cat6 23AWG Negro Panduit'},
+    'UTP Cat 6A|Panduit':{clave:'PUR6AHD04BU-G', desc:'Cable UTP Vari-MaTriX HD Cat6A 23AWG CMR Azul Panduit'}
+  },
+  canal: {
+    'Canaleta LD3':{clave:'LD3IW6-A', desc:'Canaleta LD3 PVC blanca adhesiva Panduit', m:1.8288},
+    'Canaleta LD5':{clave:'LD5IW6-A', desc:'Canaleta LD5 PVC blanca adhesiva Panduit', m:1.8288},
+    'Canaleta T45':{clave:'T45BIW8', desc:'Base canaleta T-45 PVC blanca Panduit', m:2.4},
+    'Canaleta T70':{clave:'T70BIW8', desc:'Base canaleta T-70 PVC blanca Panduit', m:2.4},
+    'Charola 50mm':{clave:'CH-54-50EZ', desc:'Charola malla 54/50mm EZ Charofil', m:3},
+    'Charola 100mm':{clave:'CH-54-100EZ', desc:'Charola malla 54/100mm EZ Charofil', m:3},
+    'Charola 150mm':{clave:'CH-54-150EZ', desc:'Charola malla 54/150mm EZ Charofil', m:3},
+    'Charola 200mm':{clave:'CH-54-200EZ', desc:'Charola malla 54/200mm EZ Charofil', m:3},
+    'Charola 300mm':{clave:'CH-54-300EZ', desc:'Charola malla 54/300mm EZ Charofil', m:3}
+  },
+  conductor: {
+    'Cable THW-LS 8 AWG':{clave:'SLY-296-BLK', desc:'Cable THW-LS 8AWG 19 hilos negro'},
+    'Cable THW-LS 10 AWG':{clave:'SLY-304-BLK', desc:'Cable THW-LS 10AWG 19 hilos negro'},
+    'Cable THW-LS 12 AWG':{clave:'SLY-308-BLK', desc:'Cable THW-LS 12AWG 19 hilos negro'},
+    'Cable THW-LS 14 AWG':{clave:'SLY-312-BLK', desc:'Cable THW-LS 14AWG 19 hilos negro'}
+  },
+  fibraCable: {
+    'OS2':{clave:'FSDR906Y', desc:'Fibra 6 hilos Monomodo OS2 interior Riser Panduit'},
+    'OM3':{clave:'FODRX06Y', desc:'Fibra 6 hilos Multimodo OM3 interior Riser Panduit'},
+    'OM4':{clave:'FODRZ06Y', desc:'Fibra 6 hilos Multimodo OM4 interior Riser Panduit'}
+  },
+  fibraConector: {
+    'LC':{clave:'FX1BN1NNNSNM001', desc:'Pigtail LC Simplex OM3 1m'},
+    'SC':{clave:'FX1BN3NNNSNM001', desc:'Pigtail SC Simplex'}
+  }
+};
+// Genera las 24 claves de tubería (patrón regular JU-PG / JU-PD / ATC40 / ATUP).
+(function(){
+  var fam = {'Tubería E/A':{p:'JU-PG', d:'pared gruesa'},'Tubería E/V':{p:'JU-PD', d:'pared delgada'},'PVC Ced. 40':{p:'ATC40', d:'PVC Cédula 40'},'PVC Pesado':{p:'ATUP', d:'PVC pesado'}};
+  var med = {'1/2"':'12','3/4"':'34','1"':'100','1 1/4"':'114','1 1/2"':'112','2"':'200'};
+  Object.keys(fam).forEach(function(t){ Object.keys(med).forEach(function(mm){
+    PARTES.canal[t+' '+mm] = {clave:fam[t].p+'-'+med[mm]+'-TUB', desc:'Tubo conduit '+mm+' '+fam[t].d, m:3};
+  }); });
+})();
+
+function ceilNum(n){ return Math.max(0, Math.ceil(n - 1e-9)); }
+function odooProducto(rec){ return '['+rec.clave+'] '+rec.desc; }
+
+// Construye las líneas de cotización para Odoo a partir del levantamiento.
+function buildOdooCotizacion(manoObra){
+  var lines = [], faltantes = [];
+  function push(rec, cantidad, precio){ if(cantidad>0) lines.push({producto:odooProducto(rec), cantidad:cantidad, precio:(precio!=null?precio:'')}); }
+
+  current.services.forEach(function(key){
+    var conf = SERVICES[key]; if(!conf) return;
+    var d = current.data[key] || {fields:{}, repeatable:{}};
+    var rep = conf.repeatable; if(!rep) return;
+    var items = (d.repeatable && d.repeatable[rep.key]) || [];
+    if(!items.length) return;
+    var bom = rep.bom || {};
+
+    // Cable de red (cobre)
+    if(bom.cableField){
+      var marca = d.fields.cable_marca || 'Panduit';
+      if(marca==='Otro') marca = d.fields.cable_marca_otro || 'Panduit';
+      var cg = {};
+      items.forEach(function(it){
+        var cat = itemFieldValue(repFieldDef(rep, bom.cableField), it, key);
+        if(!cat) return;
+        cg[cat] = (cg[cat]||0) + numVal(it.distancia);
+      });
+      Object.keys(cg).forEach(function(cat){
+        var rec = PARTES.cable[cat+'|'+marca];
+        if(rec) push(rec, ceilNum(cg[cat]));
+        else faltantes.push('Cable '+cat+' · '+marca);
+      });
+    }
+
+    // Canalización (por tipo+medida → tramos)
+    if(rep.hasCanalizacionDetail){
+      var canAgg = {};
+      items.forEach(function(it){ (it.canalizacion_detalle||[]).forEach(function(r){
+        if(!r.tipo) return;
+        var kk = r.tipo + (r.medida ? ' '+r.medida : '');
+        canAgg[kk] = (canAgg[kk]||0) + numVal(r.distancia);
+      }); });
+      Object.keys(canAgg).forEach(function(kk){
+        var rec = PARTES.canal[kk];
+        if(rec) push(rec, ceilNum(canAgg[kk] / (rec.m||1)));
+        else faltantes.push('Canalización '+kk);
+      });
+    }
+
+    // Corriente eléctrica (conductor → metros)
+    if(rep.hasEnergiaDetail){
+      var enAgg = {};
+      items.forEach(function(it){ (it.energia_detalle||[]).forEach(function(r){
+        if(!r.tipo || !r.calibre) return;
+        var kk = r.tipo + ' ' + r.calibre;
+        enAgg[kk] = (enAgg[kk]||0) + numVal(r.distancia);
+      }); });
+      Object.keys(enAgg).forEach(function(kk){
+        var rec = PARTES.conductor[kk];
+        if(rec) push(rec, ceilNum(enAgg[kk]));
+        else faltantes.push('Conductor '+kk);
+      });
+    }
+
+    // Fibra óptica (cable por subtipo + conector por terminación)
+    if(key==='fibra'){
+      var fc = {}, cn = {};
+      items.forEach(function(it){
+        if(it.subtipo_fibra){ fc[it.subtipo_fibra] = (fc[it.subtipo_fibra]||0) + numVal(it.distancia); }
+        if(it.terminacion_puntas){ var h = numVal(it.hilos)||1; cn[it.terminacion_puntas] = (cn[it.terminacion_puntas]||0) + h*2; }
+      });
+      Object.keys(fc).forEach(function(st){ var rec = PARTES.fibraCable[st]; if(rec) push(rec, ceilNum(fc[st])); else faltantes.push('Fibra '+st); });
+      Object.keys(cn).forEach(function(t){ var rec = PARTES.fibraConector[t]; if(rec) push(rec, ceilNum(cn[t])); else faltantes.push('Conector fibra '+t); });
+    }
+  });
+
+  var mo = numVal(manoObra);
+  if(mo>0) lines.push({producto:'Mano de Obra', cantidad:1, precio:mo});
+
+  return {lines:lines, faltantes:faltantes};
+}
+
+function downloadOdooCotizacion(manoObra){
+  var res = buildOdooCotizacion(manoObra);
+  if(!res.lines.length){ showToast('No hay materiales con clave para exportar.', true); return; }
+  var cols = ['Referencia de la orden','Cliente','Vendedor','Actividades','Referencia del cliente','Líneas de la orden/Producto','Líneas de la orden/Cantidad','Líneas de la orden/Precio unitario'];
+  function esc(v){ v = (v==null?'':String(v)); return /[",\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+  var out = [cols.join(',')];
+  var ref = surveyFolio(current);
+  res.lines.forEach(function(l, i){
+    var row = i===0 ? [ref, current.general.cliente||'', '', '', '', l.producto, l.cantidad, l.precio]
+                    : ['', '', '', '', '', l.producto, l.cantidad, l.precio];
+    out.push(row.map(esc).join(','));
+  });
+  var csv = '﻿' + out.join('\r\n');
+  try {
+    var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'cotizacion-odoo_'+ref+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+    if(res.faltantes.length){
+      showToast('Exportado. Sin clave (revisar): '+res.faltantes.slice(0,3).join('; ')+(res.faltantes.length>3?'…':''), true);
+    } else {
+      showToast('Cotización para Odoo descargada');
+    }
+  } catch(e){ showToast('No se pudo generar el archivo.', true); }
+}
 function renderConsolidado(){
   var out = '';
   current.services.forEach(function(key){
@@ -1833,6 +1995,9 @@ function renderSummary(){
     '<button class="btn ghost" id="btn-print">Imprimir / Guardar PDF</button>'+
     '<button class="btn ghost" id="btn-copy">Copiar resumen</button>'+
     '<button class="btn ghost" id="btn-csv">Descargar CSV</button>'+
+    '<input type="number" id="mo-monto" min="0" step="0.01" placeholder="Mano de obra $ (opcional)" '+
+      'style="max-width:190px;padding:9px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:inherit;"/>'+
+    '<button class="btn" id="btn-odoo">Cotización Odoo (CSV)</button>'+
   '</div>';
 
   var folio = surveyFolio(current);
@@ -1887,6 +2052,10 @@ function renderSummary(){
     } else { fallbackCopy(); }
   };
   document.getElementById('btn-csv').onclick = downloadCSV;
+  document.getElementById('btn-odoo').onclick = function(){
+    var mo = document.getElementById('mo-monto');
+    downloadOdooCotizacion(mo ? mo.value : '');
+  };
 }
 
 function goSummary(id){
