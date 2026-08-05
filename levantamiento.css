@@ -39,6 +39,18 @@
 #siti-app .empresa-hint{display:block;margin-top:4px;font-size:11.5px;color:var(--text-muted);min-height:14px;}
 #siti-app .empresa-hint.found{color:var(--green-strong);}
 
+/* Consolidado de materiales y cantidades por solución */
+#siti-app .summary-service.consolidado{background:var(--surface-alt);border:1px solid var(--border);border-radius:4px;padding:14px 16px;}
+#siti-app .cons-sol{margin-bottom:14px;}
+#siti-app .cons-sol:last-child{margin-bottom:0;}
+#siti-app .cons-sol h4{font-size:14px;margin:8px 0 6px;color:var(--green-strong);}
+#siti-app .cons-block{margin:0 0 8px;}
+#siti-app .cons-title{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:2px;}
+#siti-app .cons-list{list-style:none;margin:0;padding:0;}
+#siti-app .cons-list li{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:3px 0;border-bottom:1px dotted var(--border);}
+#siti-app .cons-list li:last-child{border-bottom:none;}
+#siti-app .cons-list li b{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;}
+
 /* ---------- Buttons ---------- */
 #siti-app .btn{
   border:1px solid var(--btn-primary-bg);background:var(--btn-primary-bg);color:var(--btn-primary-text);

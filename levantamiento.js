@@ -85,7 +85,7 @@ var SERVICES = {
       {key:'switch_existente', label:'Panel/Switch existente (marca/modelo/puertos libres)', type:'text', showIf:{field:'panel_espacio', equals:'Sí'}},
       {key:'notas', label:'Observaciones generales', type:'textarea'}
     ],
-    repeatable:{key:'puntos', label:'Nodos de red a instalar', itemLabel:'Nodo', addLabel:'+ Servicio', hasCanalizacionDetail:true, fields:[
+    repeatable:{key:'puntos', label:'Nodos de red a instalar', itemLabel:'Nodo', addLabel:'+ Servicio', hasCanalizacionDetail:true, bom:{cableField:'tipo_cable'}, fields:[
       {key:'ubicacion', label:'Ubicación (edificio / piso / área)', type:'text'},
       {key:'distancia', label:'Distancia al rack o switch principal (m)', type:'number'},
       {key:'tipo_cable', label:'Tipo de cable requerido', type:'select', options:CABLE_TIPOS_COBRE, inheritCable:true},
@@ -99,7 +99,7 @@ var SERVICES = {
       {key:'terminacion', label:'Equipos de terminación necesarios', type:'checkbox-qty', options:['Media converters','ODF','Transceivers / SFP','Otro'], noQty:['Otro']},
       {key:'notas', label:'Observaciones generales', type:'textarea'}
     ],
-    repeatable:{key:'enlaces', label:'Enlaces a cotizar', itemLabel:'Enlace', hasCanalizacionDetail:true, fields:[
+    repeatable:{key:'enlaces', label:'Enlaces a cotizar', itemLabel:'Enlace', hasCanalizacionDetail:true, bom:{groupBy:['tipo_fibra','subtipo_fibra','terminacion_puntas'], sums:[{key:'distancia',label:'m'},{key:'hilos',label:'hilos'}]}, fields:[
       {key:'origen', label:'Origen', type:'text'},
       {key:'destino', label:'Destino', type:'text'},
       {key:'distancia', label:'Distancia estimada (m)', type:'number'},
@@ -127,7 +127,7 @@ var SERVICES = {
       {key:'ups', label:'¿Requiere UPS / No-break?', type:'select', options:['Sí','No']},
       {key:'notas', label:'Observaciones generales', type:'textarea'}
     ],
-    repeatable:{key:'camaras', label:'Cámaras a instalar', itemLabel:'Cámara', hasCanalizacionDetail:true, fields:[
+    repeatable:{key:'camaras', label:'Cámaras a instalar', itemLabel:'Cámara', hasCanalizacionDetail:true, bom:{groupBy:['tipo','ambiente','resolucion'], cableField:'tipo_cable_camara'}, fields:[
       {key:'zona', label:'Zona / ubicación', type:'text'},
       {key:'tipo', label:'Tipo de cámara', type:'select', options:['180°','360°','Bullet','Domo','PTZ','Otra']},
       {key:'ambiente', label:'Ambiente', type:'select', options:['Exterior','Interior']},
@@ -149,7 +149,7 @@ var SERVICES = {
       {key:'ampliar_disco', label:'¿Necesita ampliar disco duro?', type:'select', options:['Sí','No','Por confirmar']},
       {key:'notas', label:'Observaciones generales', type:'textarea'}
     ],
-    repeatable:{key:'camaras_nuevas', label:'Cámaras nuevas a agregar', itemLabel:'Cámara', hasCanalizacionDetail:true, fields:[
+    repeatable:{key:'camaras_nuevas', label:'Cámaras nuevas a agregar', itemLabel:'Cámara', hasCanalizacionDetail:true, bom:{groupBy:['tipo','ambiente','resolucion'], cableField:'tipo_cable_camara'}, fields:[
       {key:'zona', label:'Zona / ubicación', type:'text'},
       {key:'tipo', label:'Tipo de cámara', type:'select', options:['180°','360°','Bullet','Domo','PTZ','Otra']},
       {key:'ambiente', label:'Ambiente', type:'select', options:['Exterior','Interior']},
@@ -201,7 +201,7 @@ var SERVICES = {
       {key:'plataforma', label:'Plataforma de administración', type:'select', options:['Plataforma en la nube','Software local','Por definir']},
       {key:'notas', label:'Observaciones generales', type:'textarea'}
     ],
-    repeatable:{key:'checadores', label:'Checadores a instalar', itemLabel:'Checador', hasCanalizacionDetail:true, fields:[
+    repeatable:{key:'checadores', label:'Checadores a instalar', itemLabel:'Checador', hasCanalizacionDetail:true, bom:{cableField:'tipo_cable'}, fields:[
       {key:'ubicacion', label:'Ubicación (edificio / piso / área)', type:'text'},
       {key:'distancia', label:'Distancia al switch o rack más cercano (m)', type:'number'},
       {key:'tipo_cable', label:'Tipo de cable requerido', type:'select', options:CABLE_TIPOS_COBRE, inheritCable:true},
@@ -220,7 +220,7 @@ var SERVICES = {
       {key:'plataforma', label:'Plataforma de administración', type:'select', options:['Plataforma en la nube','Software local','Por definir']},
       {key:'notas', label:'Observaciones generales', type:'textarea'}
     ],
-    repeatable:{key:'puntos_acceso', label:'Puntos de acceso a controlar', itemLabel:'Punto de acceso', hasCanalizacionDetail:true, hasEnergiaDetail:true, fields:[
+    repeatable:{key:'puntos_acceso', label:'Puntos de acceso a controlar', itemLabel:'Punto de acceso', hasCanalizacionDetail:true, hasEnergiaDetail:true, bom:{groupBy:['tipo_punto','tipo_chapa'], sums:[{key:'distancia',label:'m de cable'}]}, fields:[
       {key:'ubicacion', label:'Ubicación (puerta / torniquete / área)', type:'text'},
       {key:'tipo_punto', label:'Tipo de punto', type:'select', options:['Barrera vehicular','Puerta doble','Puerta sencilla','Torniquete','Otro']},
       {key:'tipo_chapa', label:'Tipo de chapa o cerradura', type:'select', options:['Eléctrica fail-safe','Eléctrica fail-secure','Magnética (maglock)','Ya existe','No aplica']},
@@ -1441,6 +1441,126 @@ function withOtherText(f, dataFields, v){
   return v;
 }
 
+/* ============ CONSOLIDADO DE MATERIALES Y CANTIDADES POR SOLUCIÓN ============ */
+function numVal(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function fmtQty(n){ return String(Math.round(n*100)/100); }
+function repFieldDef(rep, fk){
+  for(var i=0;i<rep.fields.length;i++){ if(rep.fields[i].key===fk) return rep.fields[i]; }
+  return {key:fk};
+}
+function pluralUnit(n, singular){
+  if(n===1) return singular;
+  var map = {'punto':'puntos','tramo':'tramos'};
+  return map[singular] || (singular+'s');
+}
+// Devuelve los bloques consolidados de un servicio (suma materiales iguales).
+function consolidarServicio(key){
+  var conf = SERVICES[key];
+  var d = current.data[key] || {fields:{}, repeatable:{}};
+  var blocks = [];
+
+  // Cantidades numéricas capturadas a nivel del servicio (ej. Nodos a cotizar).
+  var qtyRows = conf.fields.filter(function(f){ return f.type==='number'; }).map(function(f){
+    var v = d.fields[f.key];
+    return (v!==undefined && v!=='' && numVal(v)!==0) ? {label:f.label, value:fmtQty(numVal(v))} : null;
+  }).filter(Boolean);
+  if(qtyRows.length) blocks.push({title:'Cantidades', kind:'kv', rows:qtyRows});
+
+  var rep = conf.repeatable;
+  if(rep){
+    var items = (d.repeatable && d.repeatable[rep.key]) || [];
+    var bom = rep.bom || {};
+    if(items.length){
+      var groupBy = bom.groupBy || [];
+      var sums = bom.sums || [];
+      var groups = {}; var order = [];
+      items.forEach(function(it){
+        var sig = groupBy.length
+          ? groupBy.map(function(fk){ return itemFieldValue(repFieldDef(rep,fk), it, key) || '—'; }).join(' · ')
+          : 'Total';
+        if(!groups[sig]){ groups[sig] = {count:0, sums:{}}; order.push(sig); }
+        groups[sig].count++;
+        sums.forEach(function(s){ groups[sig].sums[s.key] = (groups[sig].sums[s.key]||0) + numVal(it[s.key]); });
+      });
+      blocks.push({title: rep.itemLabel+'s', kind:'items', rows: order.map(function(sig){
+        var g = groups[sig];
+        var extra = sums.map(function(s){ return g.sums[s.key] ? fmtQty(g.sums[s.key])+' '+s.label : null; }).filter(Boolean).join(' · ');
+        return {label: groupBy.length ? sig : 'Total', count:g.count, extra:extra};
+      })});
+
+      // Cable por categoría efectiva (metros = suma de distancias).
+      if(bom.cableField){
+        var cg = {}; var corder = [];
+        items.forEach(function(it){
+          var cat = itemFieldValue(repFieldDef(rep,bom.cableField), it, key) || '(sin especificar)';
+          if(!cg[cat]){ cg[cat] = {count:0, m:0}; corder.push(cat); }
+          cg[cat].count++; cg[cat].m += numVal(it.distancia);
+        });
+        var marca = d.fields.cable_marca ? (d.fields.cable_marca==='Otro' ? (d.fields.cable_marca_otro||'Otro') : d.fields.cable_marca) : '';
+        blocks.push({title:'Cable'+(marca?' · '+marca:''), kind:'metros', unit:'punto',
+          rows: corder.map(function(c){ return {label:c, count:cg[c].count, m:cg[c].m}; })});
+      }
+
+      // Canalización consolidada (tipo + medida) → metros.
+      if(rep.hasCanalizacionDetail){
+        var can = {}; var korder = [];
+        items.forEach(function(it){
+          (it.canalizacion_detalle||[]).forEach(function(r){
+            if(!r.tipo && !r.medida && !numVal(r.distancia)) return;
+            var kk = (r.tipo||'—')+(r.medida?' '+r.medida:'');
+            if(!can[kk]){ can[kk] = {count:0, m:0}; korder.push(kk); }
+            can[kk].count++; can[kk].m += numVal(r.distancia);
+          });
+        });
+        if(korder.length) blocks.push({title:'Canalización', kind:'metros', unit:'tramo',
+          rows: korder.map(function(k2){ return {label:k2, count:can[k2].count, m:can[k2].m}; })});
+      }
+
+      // Corriente eléctrica consolidada.
+      if(rep.hasEnergiaDetail){
+        var en = {}; var eorder = [];
+        items.forEach(function(it){
+          (it.energia_detalle||[]).forEach(function(r){
+            if(!r.tipo && !r.calibre && !numVal(r.distancia)) return;
+            var kk = [r.tipo||'—', r.calibre||'', r.canalizacion_tipo?('en '+r.canalizacion_tipo+(r.canalizacion_medida?' '+r.canalizacion_medida:'')):''].filter(Boolean).join(' · ');
+            if(!en[kk]){ en[kk] = {count:0, m:0}; eorder.push(kk); }
+            en[kk].count++; en[kk].m += numVal(r.distancia);
+          });
+        });
+        if(eorder.length) blocks.push({title:'Corriente eléctrica', kind:'metros', unit:'tramo',
+          rows: eorder.map(function(k3){ return {label:k3, count:en[k3].count, m:en[k3].m}; })});
+      }
+    }
+  }
+  return blocks;
+}
+function consBlockRight(b, r){
+  if(b.kind==='kv') return String(r.value);
+  if(b.kind==='items') return r.count + (r.extra ? ' · '+r.extra : '');
+  var u = pluralUnit(r.count, b.unit);
+  return r.count+' '+u + (r.m ? ' · '+fmtQty(r.m)+' m' : '');
+}
+function renderConsolidado(){
+  var out = '';
+  current.services.forEach(function(key){
+    if(!SERVICES[key]) return;
+    var blocks = consolidarServicio(key);
+    if(!blocks.length) return;
+    out += '<div class="cons-sol"><h4>'+escapeHtml(SERVICES[key].label)+'</h4>';
+    blocks.forEach(function(b){
+      out += '<div class="cons-block"><div class="cons-title">'+escapeHtml(b.title)+'</div><ul class="cons-list">';
+      b.rows.forEach(function(r){
+        out += '<li><span>'+escapeHtml(String(r.label))+'</span><b>'+escapeHtml(consBlockRight(b, r))+'</b></li>';
+      });
+      out += '</ul></div>';
+    });
+    out += '</div>';
+  });
+  if(!out) return '';
+  return '<div class="summary-service consolidado"><h3>Consolidado de materiales y cantidades</h3>'+
+    '<p class="summary-empty-note" style="margin:-4px 0 10px;">Totales por solución, sumando materiales iguales.</p>'+out+'</div>';
+}
+
 function renderSummaryService(key){
   var conf = SERVICES[key];
   var d = (current.data[key]) || {fields:{},repeatable:{}};
@@ -1524,6 +1644,26 @@ function buildTextSummary(){
     }
     lines.push('');
   });
+  var consLines = [];
+  current.services.forEach(function(key){
+    if(!SERVICES[key]) return;
+    var blocks = consolidarServicio(key);
+    if(!blocks.length) return;
+    consLines.push(SERVICES[key].label.toUpperCase());
+    blocks.forEach(function(b){
+      consLines.push('  '+b.title+':');
+      b.rows.forEach(function(r){ consLines.push('    - '+r.label+': '+consBlockRight(b, r)); });
+    });
+    consLines.push('');
+  });
+  if(consLines.length){
+    lines.push('='.repeat(48));
+    lines.push('CONSOLIDADO DE MATERIALES Y CANTIDADES');
+    lines.push('='.repeat(48));
+    lines.push('');
+    lines = lines.concat(consLines);
+  }
+
   lines.push('Generado: '+new Date().toLocaleString('es-MX'));
   return lines.join('\n');
 }
@@ -1620,6 +1760,31 @@ function buildCSV(){
     }
   });
 
+  // Consolidado de materiales y cantidades por solución.
+  var anyCons = false;
+  current.services.forEach(function(key){
+    if(!SERVICES[key]) return;
+    var blocks = consolidarServicio(key);
+    if(!blocks.length) return;
+    if(!anyCons){
+      lines.push('');
+      lines.push(csvRow(['CONSOLIDADO DE MATERIALES Y CANTIDADES']));
+      anyCons = true;
+    }
+    lines.push('');
+    lines.push(csvRow([SERVICES[key].label.toUpperCase()]));
+    blocks.forEach(function(b){
+      lines.push(csvRow([b.title, 'Cantidad', 'Metros']));
+      b.rows.forEach(function(r){
+        var qty, m='';
+        if(b.kind==='kv'){ qty = r.value; }
+        else if(b.kind==='items'){ qty = r.count + (r.extra ? ' ('+r.extra+')' : ''); }
+        else { qty = r.count+' '+pluralUnit(r.count, b.unit); m = r.m ? fmtQty(r.m) : ''; }
+        lines.push(csvRow([r.label, qty, m]));
+      });
+    });
+  });
+
   lines.push('');
   lines.push(csvRow(['Generado', new Date().toLocaleString('es-MX')]));
   return lines.join('\r\n');
@@ -1697,6 +1862,7 @@ function renderSummary(){
   if(current.services.length===0){
     html += '<p class="summary-empty-note">No se seleccionó ningún servicio.</p>';
   } else {
+    html += renderConsolidado();
     current.services.forEach(function(key){ html += renderSummaryService(key); });
   }
 
