@@ -1,22 +1,22 @@
 /* Costos de Mano de Obra — estilos escopados bajo #costos-app, homologados a la paleta verde SITI */
 #costos-app {
     /* Paleta homologada con Levantamiento en Sitio (verde SITI) */
-    --navy:#181c18;
-    --green:#58AD50;
-    --blue1:#356b30;
-    --blue2:#58AD50;
-    --blue3:#cfe6ca;
-    --bg:#ffffff;
+    --navy:#0A2540;
+    --green:#5AAD4F;
+    --blue1:#3E8236;
+    --blue2:#5AAD4F;
+    --blue3:#CFE6CA;
+    --bg:#F9FAFC;
     --panel:#ffffff;
-    --panel-alt:#f4f6f3;
-    --line:#dbe2d8;
-    --muted:#5c6659;
-    --ink:#181c18;
-    --amber-bg:#FFF6DA;
-    --amber-ink:#6B4E00;
-    --amber-line:#E8D48A;
+    --panel-alt:#EEF2F7;
+    --line:#E2E8F0;
+    --muted:#5B6B7F;
+    --ink:#1B2430;
+    --amber-bg:#FFF7E6;
+    --amber-ink:#8A5A00;
+    --amber-line:#FDE29B;
     --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
-    --sans:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --sans:'Hanken Grotesk','Inter',system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   }
 #costos-app * {box-sizing:border-box}
 #costos-app,
@@ -182,15 +182,15 @@
    administración (ámbar claro) se convierte en ámbar oscuro legible.
    ========================================================================= */
 :root[data-theme="dark"] #costos-app{
-  --navy:#eef1e9; --green:#7bc873; --blue1:#7bc873; --blue2:#7bc873; --blue3:#a8dea1;
-  --bg:#14170f; --panel:#1c2016; --panel-alt:#242a1b; --line:#333a2b;
-  --muted:#a3ac9a; --ink:#eef1e9;
+  --navy:#E9EFF7; --green:#6FC263; --blue1:#6FC263; --blue2:#6FC263; --blue3:#A7DBA0;
+  --bg:#0D1420; --panel:#141D2E; --panel-alt:#1B2740; --line:#2A374B;
+  --muted:#9DAABF; --ink:#E9EFF7;
   --amber-bg:#2a2410; --amber-ink:#e8cf7a; --amber-line:#5c4f22;
 }
 /* Bordes que usaban --navy siguen legibles al volverse claros; banners de fondo: */
-:root[data-theme="dark"] #costos-app .costo-hora-box{background:#242a1b;color:var(--ink)}
-:root[data-theme="dark"] #costos-app .total-panel{background:#242a1b;border-color:var(--line)}
-:root[data-theme="dark"] #costos-app .toast{background:#242a1b;color:var(--ink)}
+:root[data-theme="dark"] #costos-app .costo-hora-box{background:#1B2740;color:var(--ink)}
+:root[data-theme="dark"] #costos-app .total-panel{background:#1B2740;border-color:var(--line)}
+:root[data-theme="dark"] #costos-app .toast{background:#1B2740;color:var(--ink)}
 :root[data-theme="dark"] #costos-app .btn-generar:hover{background:var(--blue1);color:#10150c}
 /* --blue1 ahora es verde brillante: los controles que lo usan de fondo llevan texto oscuro */
 :root[data-theme="dark"] #costos-app .tipo-op input:checked + label{background:var(--blue1);color:#10150c}
@@ -198,8 +198,8 @@
 :root[data-theme="dark"] #costos-app .btn-primary{color:#10150c}
 :root[data-theme="dark"] #costos-app .btn-primary:hover{background:var(--green)}
 /* Fondos blancos fijos → superficies oscuras */
-:root[data-theme="dark"] #costos-app .btn-admin{background:#242a1b}
-:root[data-theme="dark"] #costos-app .btn-secondary{background:#242a1b;color:var(--ink)}
+:root[data-theme="dark"] #costos-app .btn-admin{background:#1B2740}
+:root[data-theme="dark"] #costos-app .btn-secondary{background:#1B2740;color:var(--ink)}
 :root[data-theme="dark"] #costos-app .modal-box{background:var(--panel)}
 :root[data-theme="dark"] #costos-app .admin-panel .inp-precio,
 :root[data-theme="dark"] #costos-app .inp-tiempo,
@@ -220,3 +220,4 @@
 #costos-app .btn:active{transform:translateY(1px);}
 #costos-app .btn-secondary{box-shadow:none;}
 #costos-app .grid-datos input:focus,#costos-app .inp-precio:focus,#costos-app .inp-cant:focus,#costos-app .inp-pct:focus,#costos-app .inp-tiempo:focus,#costos-app .inp-gasto-nombre:focus{outline:none;box-shadow:var(--ring);border-color:var(--blue1);}
+#costos-app .btn,#costos-app .btn-generar,#costos-app .btn-admin{border-radius:var(--radius-pill);}

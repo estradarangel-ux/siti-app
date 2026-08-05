@@ -1,15 +1,15 @@
 /* Calculadora de material eléctrico — estilos escopados bajo #calc-app, homologados a la paleta verde SITI */
 #calc-app {
     /* Paleta homologada con Levantamiento en Sitio (verde SITI) */
-    --bg:#ffffff; --panel:#f4f6f3; --ink:#181c18; --muted:#5c6659;
-    --line:#dbe2d8; --accent:#58AD50; --accent-dark:#356b30; --accent-ink:#181c18;
-    --blue:#58AD50; --sky:#bfe3ba; --pale:#cfe6ca; --box:#eef6ec;
-    --steel:#8b968a; --steel-dark:#5c6659; --pvc:#3d7a54; --tray:#3d6e7a;
-    --danger:#a33a2f; --radius:14px;
+    --bg:#F9FAFC; --panel:#ffffff; --ink:#0A2540; --muted:#5B6B7F;
+    --line:#E2E8F0; --accent:#5AAD4F; --accent-dark:#3E8236; --accent-ink:#0A2540;
+    --blue:#5AAD4F; --sky:#BFE3BA; --pale:#CFE6CA; --box:#EAF5E9;
+    --steel:#8b968a; --steel-dark:#5B6B7F; --pvc:#3d7a54; --tray:#3d6e7a;
+    --danger:#D92D20; --radius:14px;
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-    --disp:'Space Grotesk','Inter',system-ui,-apple-system,sans-serif;
+    --disp:'Hanken Grotesk','Inter',system-ui,-apple-system,sans-serif;
   }
-#calc-app{font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
+#calc-app{font-family:'Hanken Grotesk','Inter',system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
 #calc-app * {box-sizing:border-box}
 #calc-app [hidden] {display:none !important}
 #calc-app,
@@ -157,32 +157,32 @@
    que antes lo usaban de fondo se reasignan a superficies/verde oscuros.
    ========================================================================= */
 :root[data-theme="dark"] #calc-app{
-  --bg:#14170f; --panel:#1c2016; --ink:#eef1e9; --muted:#a3ac9a;
-  --line:#333a2b; --accent:#7bc873; --accent-dark:#5fae57; --accent-ink:#10150c;
-  --blue:#7bc873; --sky:#a8dea1; --pale:#c7e8c2; --box:#1f2e19;
-  --steel:#8b968a; --steel-dark:#a3ac9a; --pvc:#4f9a6a; --tray:#4f8b98;
-  --danger:#e2685a;
+  --bg:#0D1420; --panel:#141D2E; --ink:#E9EFF7; --muted:#9DAABF;
+  --line:#2A374B; --accent:#6FC263; --accent-dark:#4f9a54; --accent-ink:#0A1A0E;
+  --blue:#6FC263; --sky:#A7DBA0; --pale:#C7E8C2; --box:#17281B;
+  --steel:#8b968a; --steel-dark:#9DAABF; --pvc:#4f9a6a; --tray:#4f8b98;
+  --danger:#F97066;
 }
 /* Banners y controles que antes usaban --ink (near-black) como fondo */
-:root[data-theme="dark"] #calc-app header{background:#242a1b}
-:root[data-theme="dark"] #calc-app .seccion{background:#242a1b;color:var(--ink)}
-:root[data-theme="dark"] #calc-app .kpi{background:#242a1b}
+:root[data-theme="dark"] #calc-app header{background:#1B2740}
+:root[data-theme="dark"] #calc-app .seccion{background:#1B2740;color:var(--ink)}
+:root[data-theme="dark"] #calc-app .kpi{background:#1B2740}
 :root[data-theme="dark"] #calc-app .btn-main{background:var(--accent);color:#10150c;border-color:var(--accent)}
 :root[data-theme="dark"] #calc-app .btn-main:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
 :root[data-theme="dark"] #calc-app .sistema button.on{background:var(--accent);color:#10150c;border-color:var(--accent)}
 /* Fondos blancos fijos → superficies oscuras */
 :root[data-theme="dark"] #calc-app input,
-:root[data-theme="dark"] #calc-app select{background:#242a1b;color:var(--ink)}
-:root[data-theme="dark"] #calc-app .tramo{background:#242a1b}
-:root[data-theme="dark"] #calc-app .btn-ghost{background:#242a1b;color:var(--ink);border-color:var(--line)}
-:root[data-theme="dark"] #calc-app .sistema button{background:#242a1b}
+:root[data-theme="dark"] #calc-app select{background:#1B2740;color:var(--ink)}
+:root[data-theme="dark"] #calc-app .tramo{background:#1B2740}
+:root[data-theme="dark"] #calc-app .btn-ghost{background:#1B2740;color:var(--ink);border-color:var(--line)}
+:root[data-theme="dark"] #calc-app .sistema button{background:#1B2740}
 :root[data-theme="dark"] #calc-app .ticket{background:var(--panel)}
 :root[data-theme="dark"] #calc-app .ticket::before{
   background:radial-gradient(circle at 8px 7px,var(--bg) 5px,var(--panel) 5.5px);
   background-size:17px 14px;background-repeat:repeat-x}
-:root[data-theme="dark"] #calc-app .cl.na{background:#242a1b;color:var(--muted);border-color:var(--line)}
+:root[data-theme="dark"] #calc-app .cl.na{background:#1B2740;color:var(--muted);border-color:var(--line)}
 :root[data-theme="dark"] #calc-app .cl.custom{background:var(--box);color:var(--sky);border-color:var(--accent-dark)}
-:root[data-theme="dark"] #calc-app .pu.vacio{background:#242a1b;color:var(--muted);border-color:var(--line)}
+:root[data-theme="dark"] #calc-app .pu.vacio{background:#1B2740;color:var(--muted);border-color:var(--line)}
 
 /* ================= REFRESH SUAVE / MODERNO ================= */
 #calc-app .card{box-shadow:var(--shadow-sm);}
@@ -193,3 +193,4 @@
 #calc-app .chip{border-radius:999px;padding:3px 10px;}
 #calc-app .card h2::before{border-radius:4px;}
 #calc-app input:focus-visible,#calc-app select:focus-visible,#calc-app button:focus-visible,#calc-app summary:focus-visible,#calc-app .cl:focus-visible{outline:none;box-shadow:var(--ring);border-color:var(--accent);}
+#calc-app .btn-main,#calc-app .btn-ghost,#calc-app .sistema button{border-radius:var(--radius-pill);}

@@ -3,69 +3,76 @@
    Tokens de diseño compartidos (paleta verde SITI, tomada de Levantamiento)
    ========================================================================= */
 :root{
-  --bg:#ffffff;
+  --bg:#F9FAFC;
   --surface:#ffffff;
-  --surface-alt:#f4f6f3;
-  --text:#181c18;
-  --text-muted:#5c6659;
-  --text-faint:#8a9385;
-  --border:#dbe2d8;
-  --green:#58AD50;
-  --green-strong:#356b30;
-  --green-tint:#eef6ec;
-  --danger:#a33a2f;
-  --btn-primary-bg:#181c18;
+  --surface-alt:#EEF2F7;
+  --text:#1B2430;
+  --text-muted:#5B6B7F;
+  --text-faint:#94A0B0;
+  --border:#E2E8F0;
+  --green:#5AAD4F;
+  --green-strong:#3E8236;
+  --green-tint:#EAF5E9;
+  --navy:#0A2540;
+  --navy-800:#122F4E;
+  --yellow:#FDB82C;
+  --danger:#D92D20;
+  --btn-primary-bg:#5AAD4F;
   --btn-primary-text:#ffffff;
-  --overlay:rgba(20,24,19,.55);
-  --topbar-bg:rgba(255,255,255,.96);
+  --overlay:rgba(10,37,64,.55);
+  --topbar-bg:rgba(249,250,252,.9);
   --radius:16px;
   --radius-sm:11px;
-  --shadow-sm:0 1px 2px rgba(20,24,19,.06), 0 1px 3px rgba(20,24,19,.09);
-  --shadow-md:0 6px 20px rgba(20,24,19,.09), 0 2px 6px rgba(20,24,19,.06);
-  --ring:0 0 0 3px rgba(88,173,80,.28);
+  --radius-pill:999px;
+  --shadow-sm:0 2px 8px rgba(10,37,64,.06);
+  --shadow-md:0 12px 30px rgba(10,37,64,.12), 0 2px 6px rgba(10,37,64,.06);
+  --ring:0 0 0 3px rgba(90,173,80,.30);
   color-scheme: light;
 }
 :root[data-theme="dark"]{
-  --bg:#14170f;
-  --surface:#1c2016;
-  --surface-alt:#242a1b;
-  --text:#eef1e9;
-  --text-muted:#a3ac9a;
-  --text-faint:#7b8471;
-  --border:#333a2b;
-  --green:#7bc873;
-  --green-strong:#a8dea1;
-  --green-tint:#1f2e19;
-  --danger:#e2685a;
+  --bg:#0D1420;
+  --surface:#141D2E;
+  --surface-alt:#1B2740;
+  --text:#E9EFF7;
+  --text-muted:#9DAABF;
+  --text-faint:#6C7A90;
+  --border:#2A374B;
+  --green:#6FC263;
+  --green-strong:#A7DBA0;
+  --green-tint:#17281B;
+  --navy:#0A2540;
+  --navy-800:#122F4E;
+  --yellow:#FDB82C;
+  --danger:#F97066;
   --btn-primary-bg:var(--green);
-  --btn-primary-text:#10150c;
-  --overlay:rgba(0,0,0,.65);
-  --topbar-bg:rgba(20,23,15,.92);
-  --shadow-sm:0 1px 2px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.45);
-  --shadow-md:0 8px 24px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.4);
-  --ring:0 0 0 3px rgba(123,200,115,.32);
+  --btn-primary-text:#0A1A0E;
+  --overlay:rgba(0,0,0,.66);
+  --topbar-bg:rgba(13,20,32,.92);
+  --shadow-sm:0 2px 8px rgba(0,0,0,.4);
+  --shadow-md:0 12px 30px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.4);
+  --ring:0 0 0 3px rgba(111,194,99,.32);
   color-scheme: dark;
 }
 
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
-  font-family:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+  font-family:'Hanken Grotesk','Inter',system-ui,-apple-system,Segoe UI,sans-serif;
   color:var(--text);
   background:var(--bg);
   line-height:1.45;
   -webkit-font-smoothing:antialiased;
 }
-.disp{font-family:'Space Grotesk','Inter',system-ui,sans-serif;}
-h1,h2,h3{font-family:'Space Grotesk','Inter',system-ui,sans-serif;margin:0;font-weight:700;}
+.disp{font-family:'Hanken Grotesk','Inter',system-ui,sans-serif;letter-spacing:-.01em;}
+h1,h2,h3{font-family:'Hanken Grotesk','Inter',system-ui,sans-serif;margin:0;font-weight:700;letter-spacing:-.01em;}
 button{font-family:inherit;cursor:pointer;}
 ::selection{background:var(--green);color:#fff;}
 
 /* ---------- Botones compartidos (login, shell) ---------- */
 .btn{
   border:1px solid var(--btn-primary-bg);background:var(--btn-primary-bg);color:var(--btn-primary-text);
-  padding:11px 18px;font-size:14px;font-weight:600;letter-spacing:.01em;
-  border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);
+  padding:11px 20px;font-size:14px;font-weight:600;letter-spacing:.01em;
+  border-radius:var(--radius-pill);box-shadow:var(--shadow-sm);
   transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .05s;
 }
 .btn:hover{background:var(--green-strong);border-color:var(--green-strong);box-shadow:var(--shadow-md);}

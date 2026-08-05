@@ -1,6 +1,6 @@
 /* Levantamiento en Sitio — estilos de componentes (usa los tokens globales de styles.css) */
 #siti-app{
-  font-family:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+  font-family:'Hanken Grotesk','Inter',system-ui,-apple-system,Segoe UI,sans-serif;
   color:var(--text);
   background:var(--bg);
   max-width:760px;
@@ -11,8 +11,8 @@
 @media (min-width:900px){ #siti-app{ max-width:880px; } }
 @media (min-width:1200px){ #siti-app{ max-width:1040px; } }
 #siti-app *{box-sizing:border-box;}
-#siti-app .disp{font-family:'Space Grotesk','Inter',system-ui,sans-serif;}
-#siti-app h1,#siti-app h2,#siti-app h3{font-family:'Space Grotesk','Inter',system-ui,sans-serif;margin:0;font-weight:700;}
+#siti-app .disp{font-family:'Hanken Grotesk','Inter',system-ui,sans-serif;letter-spacing:-.01em;}
+#siti-app h1,#siti-app h2,#siti-app h3{font-family:'Hanken Grotesk','Inter',system-ui,sans-serif;margin:0;font-weight:700;letter-spacing:-.01em;}
 #siti-app button{font-family:inherit;cursor:pointer;}
 #siti-app ::selection{background:var(--green);color:#fff;}
 
@@ -54,8 +54,8 @@
 /* ---------- Buttons ---------- */
 #siti-app .btn{
   border:1px solid var(--btn-primary-bg);background:var(--btn-primary-bg);color:var(--btn-primary-text);
-  padding:11px 18px;font-size:14px;font-weight:600;letter-spacing:.01em;
-  border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);
+  padding:11px 20px;font-size:14px;font-weight:600;letter-spacing:.01em;
+  border-radius:var(--radius-pill);box-shadow:var(--shadow-sm);
   transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .05s;
 }
 #siti-app .btn:hover{background:var(--green-strong);border-color:var(--green-strong);box-shadow:var(--shadow-md);}
