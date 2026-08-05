@@ -40,7 +40,7 @@
 #siti-app .empresa-hint.found{color:var(--green-strong);}
 
 /* Consolidado de materiales y cantidades por solución */
-#siti-app .summary-service.consolidado{background:var(--surface-alt);border:1px solid var(--border);border-radius:4px;padding:14px 16px;}
+#siti-app .summary-service.consolidado{background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow-sm);}
 #siti-app .cons-sol{margin-bottom:14px;}
 #siti-app .cons-sol:last-child{margin-bottom:0;}
 #siti-app .cons-sol h4{font-size:14px;margin:8px 0 6px;color:var(--green-strong);}
@@ -55,35 +55,39 @@
 #siti-app .btn{
   border:1px solid var(--btn-primary-bg);background:var(--btn-primary-bg);color:var(--btn-primary-text);
   padding:11px 18px;font-size:14px;font-weight:600;letter-spacing:.01em;
-  border-radius:0;transition:background .15s,color .15s,border-color .15s;
+  border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);
+  transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .05s;
 }
-#siti-app .btn:hover{background:var(--green-strong);border-color:var(--green-strong);}
-#siti-app .btn.secondary{background:transparent;color:var(--text);border-color:var(--btn-primary-bg);}
-#siti-app .btn.secondary:hover{background:var(--surface-alt);}
-#siti-app .btn.ghost{background:transparent;border-color:var(--border);color:var(--text-muted);}
-#siti-app .btn.ghost:hover{border-color:var(--text);color:var(--text);}
-#siti-app .btn.danger{background:transparent;border-color:var(--danger);color:var(--danger);}
+#siti-app .btn:hover{background:var(--green-strong);border-color:var(--green-strong);box-shadow:var(--shadow-md);}
+#siti-app .btn:active{transform:translateY(1px);}
+#siti-app .btn.secondary{background:transparent;color:var(--text);border-color:var(--border);box-shadow:none;}
+#siti-app .btn.secondary:hover{background:var(--surface-alt);border-color:var(--text-muted);}
+#siti-app .btn.ghost{background:transparent;border-color:var(--border);color:var(--text-muted);box-shadow:none;}
+#siti-app .btn.ghost:hover{border-color:var(--text);color:var(--text);background:var(--surface-alt);}
+#siti-app .btn.danger{background:transparent;border-color:var(--danger);color:var(--danger);box-shadow:none;}
 #siti-app .btn.danger:hover{background:var(--danger);color:#fff;}
 #siti-app .btn.block{width:100%;}
 #siti-app .btn:focus-visible, #siti-app input:focus-visible, #siti-app select:focus-visible, #siti-app textarea:focus-visible, #siti-app .service-card:focus-within{
-  outline:2px solid var(--green);outline-offset:2px;
+  outline:none;box-shadow:var(--ring);border-color:var(--green);
 }
 
 /* ---------- List view ---------- */
 #siti-app .list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;}
 #siti-app .empty-state{
-  border:1px dashed var(--border);padding:40px 20px;text-align:center;color:var(--text-muted);font-size:14px;
+  border:1px dashed var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;color:var(--text-muted);font-size:14px;background:var(--surface-alt);
 }
 #siti-app .survey-grid{display:grid;grid-template-columns:1fr;gap:12px;}
 @media (min-width:700px){ #siti-app .survey-grid{grid-template-columns:1fr 1fr;} }
 @media (min-width:1150px){ #siti-app .survey-grid{grid-template-columns:1fr 1fr 1fr;} }
 #siti-app .survey-card{
-  border:1px solid var(--border);padding:14px 16px;position:relative;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;position:relative;background:var(--surface);
+  box-shadow:var(--shadow-sm);transition:box-shadow .15s,transform .1s;
 }
+#siti-app .survey-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
 #siti-app .survey-card h3{font-size:16px;margin-bottom:2px;}
 #siti-app .survey-card .meta{font-size:12.5px;color:var(--text-muted);margin-bottom:8px;}
 #siti-app .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-#siti-app .chip{font-size:11px;letter-spacing:.02em;text-transform:uppercase;border:1px solid var(--green);color:var(--green-strong);background:var(--green-tint);padding:3px 8px;}
+#siti-app .chip{font-size:11px;letter-spacing:.02em;text-transform:uppercase;border:1px solid var(--green);color:var(--green-strong);background:var(--green-tint);padding:3px 10px;border-radius:999px;}
 #siti-app .card-actions{display:flex;gap:8px;flex-wrap:wrap;}
 #siti-app .card-actions .btn{padding:8px 12px;font-size:13px;}
 
@@ -96,7 +100,7 @@
 #siti-app .bracket::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--green);border-right:2px solid var(--green);}
 
 /* ---------- Sections / accordion ---------- */
-#siti-app .section{border:1px solid var(--border);margin-bottom:14px;background:var(--surface);}
+#siti-app .section{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;background:var(--surface);box-shadow:var(--shadow-sm);overflow:hidden;}
 #siti-app .section > .sec-title{
   padding:13px 16px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
   border-bottom:1px solid var(--border);color:var(--text-muted);
@@ -118,14 +122,14 @@
 #siti-app .field span{display:block;font-size:12.5px;color:var(--text-muted);margin-bottom:5px;font-weight:500;}
 #siti-app input[type=text],#siti-app input[type=number],#siti-app input[type=date],#siti-app input[type=email],#siti-app input[type=password],#siti-app select,#siti-app textarea{
   width:100%;border:1px solid var(--border);background:var(--surface);padding:10px 11px;font-size:14.5px;color:var(--text);
-  border-radius:0;font-family:inherit;
+  border-radius:var(--radius-sm);font-family:inherit;
 }
 #siti-app textarea{resize:vertical;min-height:56px;}
 #siti-app .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 @media (max-width:520px){#siti-app .field-row{grid-template-columns:1fr;}}
 
 #siti-app .chip-check-group{display:flex;flex-wrap:wrap;gap:8px;}
-#siti-app .chip-check{border:1px solid var(--border);padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer;}
+#siti-app .chip-check{border:1px solid var(--border);border-radius:999px;padding:8px 14px;font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer;transition:border-color .15s,background .15s;}
 #siti-app .chip-check input{margin:0;}
 #siti-app .chip-check:has(input:checked){border-color:var(--green);background:var(--green-tint);color:var(--green-strong);}
 
@@ -134,7 +138,7 @@
 @media (max-width:480px){#siti-app .service-grid{grid-template-columns:1fr;}}
 @media (min-width:900px){#siti-app .service-grid{grid-template-columns:1fr 1fr 1fr;}}
 #siti-app .service-card{
-  border:1px solid var(--border);padding:12px 13px;position:relative;display:flex;align-items:flex-start;gap:10px;
+  border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 13px;position:relative;display:flex;align-items:flex-start;gap:10px;transition:border-color .15s,background .15s;
 }
 #siti-app .service-card input{position:absolute;opacity:0;width:1px;height:1px;}
 #siti-app .service-card .box{width:16px;height:16px;border:1.5px solid var(--text-faint);flex:0 0 auto;margin-top:1px;position:relative;}
@@ -150,12 +154,12 @@
 #siti-app .qty-group{display:flex;flex-direction:column;gap:8px;}
 #siti-app .qty-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 #siti-app .qty-row .chip-check{flex:0 0 auto;}
-#siti-app .qty-input{width:100px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:7px 9px;font-size:13.5px;border-radius:0;}
+#siti-app .qty-input{width:100px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:7px 9px;font-size:13.5px;border-radius:var(--radius-sm);}
 
-#siti-app .other-text-input{width:100%;margin-top:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 11px;font-size:14.5px;border-radius:0;font-family:inherit;}
+#siti-app .other-text-input{width:100%;margin-top:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 11px;font-size:14.5px;border-radius:var(--radius-sm);font-family:inherit;}
 
 #siti-app .rep-list{margin-top:10px;}
-#siti-app .rep-item{border:1px solid var(--border);padding:13px;margin-bottom:10px;background:var(--surface-alt);position:relative;}
+#siti-app .rep-item{border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;background:var(--surface-alt);position:relative;}
 #siti-app .rep-item .rep-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 #siti-app .rep-item .rep-head strong{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);}
 #siti-app .rep-remove{border:none;background:none;color:var(--danger);font-size:12.5px;text-decoration:underline;padding:6px 4px;}
@@ -171,7 +175,8 @@
 /* ---------- Toast ---------- */
 #siti-app .toast{
   position:fixed;left:50%;bottom:90px;transform:translateX(-50%);
-  background:var(--btn-primary-bg);color:var(--btn-primary-text);padding:10px 18px;font-size:13.5px;z-index:60;
+  background:var(--btn-primary-bg);color:var(--btn-primary-text);padding:11px 20px;font-size:13.5px;z-index:60;
+  border-radius:var(--radius-sm);box-shadow:var(--shadow-md);
   opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
 }
 #siti-app .toast.show{opacity:1;}
@@ -188,7 +193,7 @@
 #siti-app .summary-service{margin-bottom:26px;}
 #siti-app .summary-service h3{font-size:14px;text-transform:uppercase;letter-spacing:.05em;padding-bottom:6px;border-bottom:1px solid var(--text);margin-bottom:12px;break-after:avoid;}
 #siti-app .summary-item-list{margin-top:12px;display:flex;flex-direction:column;gap:12px;}
-#siti-app .summary-item{border:1px solid var(--border);background:var(--surface-alt);padding:13px 15px;page-break-inside:avoid;position:relative;}
+#siti-app .summary-item{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-alt);padding:14px 16px;page-break-inside:avoid;position:relative;}
 #siti-app .summary-item-title{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--green-strong);font-weight:700;margin-bottom:8px;}
 #siti-app .summary-item dl.spec{grid-template-columns:150px 1fr;font-size:13.5px;background:transparent;}
 #siti-app .summary-subdetail{margin-top:10px;padding-top:9px;border-top:1px dashed var(--border);font-size:13px;color:var(--text-muted);}
@@ -201,7 +206,7 @@
   z-index:100;padding:20px;
 }
 #siti-app .siti-confirm-box{
-  background:var(--surface);max-width:340px;width:100%;padding:20px;border:1px solid var(--border);
+  background:var(--surface);max-width:340px;width:100%;padding:22px;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);
 }
 #siti-app .siti-confirm-box p{font-size:14.5px;margin:0 0 16px;}
 #siti-app .siti-confirm-actions{display:flex;gap:10px;}
