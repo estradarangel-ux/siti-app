@@ -216,6 +216,10 @@ var SERVICES = {
     label:'Control de Acceso', short:'Control de Acceso',
     fields:[
       {key:'usuarios', label:'Número de usuarios a registrar', type:'number'},
+      {key:'cable_categoria', label:'Categoría de cableado (cobre)', type:'select', options:CABLE_TIPOS_COBRE, pairWithNext:true},
+      {key:'cable_marca', label:'Marca de cableado', type:'select', options:CABLE_MARCAS, triggersRerender:true},
+      {key:'cable_marca_otro', label:'Especifique la marca de cableado', type:'text', showIf:{field:'cable_marca', equals:'Otro'}},
+      {key:'cable_color', label:'Color de cable', type:'select', options:['Azul','Gris']},
       {key:'tipo_identificacion', label:'Tipo de identificación por punto', type:'checkbox-group', options:['Bluetooth','Huella digital','PIN / clave','QR','Reconocimiento facial','Tag','Tarjeta de proximidad']},
       {key:'integracion', label:'¿Requiere integración con otros sistemas?', type:'checkbox-group', options:['CCTV','Control de Asistencia','Ninguna'], triggersRerenderOptions:['Control de Asistencia']},
       {key:'software_nomina', label:'¿Requiere integración con sistema de nómina / RH?', type:'select', options:['Sí','No','Por definir'], showIf:{field:'integracion', includes:'Control de Asistencia'}, triggersRerender:true},
@@ -223,11 +227,12 @@ var SERVICES = {
       {key:'plataforma', label:'Plataforma de administración', type:'select', options:['Plataforma en la nube','Software local','Por definir']},
       {key:'notas', label:'Observaciones generales', type:'textarea'}
     ],
-    repeatable:{key:'puntos_acceso', label:'Puntos de acceso a controlar', itemLabel:'Punto de acceso', hasCanalizacionDetail:true, hasEnergiaDetail:true, bom:{groupBy:['tipo_punto','tipo_chapa'], sums:[{key:'distancia',label:'m de cable'}]}, fields:[
+    repeatable:{key:'puntos_acceso', label:'Puntos de acceso a controlar', itemLabel:'Punto de acceso', hasCanalizacionDetail:true, hasEnergiaDetail:true, bom:{cableField:'tipo_cable', groupBy:['tipo_punto','tipo_chapa'], sums:[{key:'distancia',label:'m de cable'}]}, fields:[
       {key:'ubicacion', label:'Ubicación (puerta / torniquete / área)', type:'text'},
       {key:'tipo_punto', label:'Tipo de punto', type:'select', options:['Barrera vehicular','Puerta doble','Puerta sencilla','Torniquete','Otro']},
       {key:'tipo_chapa', label:'Tipo de chapa o cerradura', type:'select', options:['Eléctrica fail-safe','Eléctrica fail-secure','Magnética (maglock)','Ya existe','No aplica']},
       {key:'distancia', label:'Distancia al controlador o panel (m)', type:'number'},
+      {key:'tipo_cable', label:'Tipo de cable requerido', type:'select', options:CABLE_TIPOS_COBRE, inheritCable:true},
       {key:'energia_cercana', label:'¿Hay energía eléctrica cercana?', type:'select', options:['Sí','No'], triggersRerender:true},
       {key:'canalizacion', label:'¿Requiere canalización nueva?', type:'select', options:['Sí','No','Parcial'], triggersRerender:true},
       {key:'observaciones', label:'Observaciones', type:'textarea'}
