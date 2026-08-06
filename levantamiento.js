@@ -80,6 +80,9 @@ var SERVICES = {
       {key:'cable_categoria', label:'Categoría de cableado (cobre)', type:'select', options:CABLE_TIPOS_COBRE, pairWithNext:true},
       {key:'cable_marca', label:'Marca de cableado', type:'select', options:CABLE_MARCAS, triggersRerender:true},
       {key:'cable_marca_otro', label:'Especifique la marca de cableado', type:'text', showIf:{field:'cable_marca', equals:'Otro'}},
+      {key:'cable_color', label:'Color de cable', type:'select', options:['Azul','Gris'], pairWithNext:true},
+      {key:'placa_tipo', label:'Tipo de placa (faceplate)', type:'select', options:['1 ventana','2 ventanas','4 ventanas']},
+      {key:'rack_ur', label:'Tamaño del gabinete/rack (UR)', type:'number'},
       {key:'infraestructura_rack', label:'¿Existe rack o gabinete disponible?', type:'select', options:['Sí','No','No aplica']},
       {key:'panel_espacio', label:'¿Cuenta con espacio suficiente en panel de parcheo?', type:'select', options:['Sí','No','No aplica'], triggersRerender:true},
       {key:'switch_existente', label:'Panel/Switch existente (marca/modelo/puertos libres)', type:'text', showIf:{field:'panel_espacio', equals:'Sí'}},
@@ -1593,13 +1596,53 @@ var PARTES = {
   }); });
 })();
 
+// Accesorios de conectividad (jacks, placas, cordones, rack, LOTEM).
+PARTES.cable['UTP Cat 6|Panduit|Azul'] = {clave:'PUR6004BU-ME', desc:'Cable UTP TX6000 Cat6 23AWG CMR Azul Panduit'};
+PARTES.cable['UTP Cat 6|Panduit|Gris'] = {clave:'PUR6004IG-ME', desc:'Cable UTP TX6000 Cat6 23AWG CMR Gris Panduit'};
+PARTES.jack = {
+  'Cat 5e':{clave:'CJ5E88TGBU', desc:'Jack RJ45 Cat5e Mini-Com azul Panduit'},
+  'Cat 6':{clave:'CJ688TGBU', desc:'Jack RJ45 Cat6 Mini-Com azul Panduit'},
+  'Cat 6A':{clave:'CJ6X88TGBU', desc:'Jack RJ45 Cat6A Mini-Com azul Panduit'}
+};
+PARTES.fpTerm = {clave:'FP6X88MTG', desc:'Jack/Plug modular terminación en campo cat 5e/6/6A'};
+PARTES.placa = {
+  '1 ventana':{clave:'CFPE1IWY', desc:'Placa ejecutiva 1 ventana blanco oficina Panduit', porNodo:1},
+  '2 ventanas':{clave:'CFPE2IWY', desc:'Placa 2 ventanas blanco oficina Panduit', porNodo:0.5},
+  '2 ventanas angular':{clave:'CFPSL2IWY', desc:'Placa angular 2 ventanas blanco oficina Panduit', porNodo:0.5},
+  '4 ventanas':{clave:'CFPE4IWY', desc:'Placa 4 ventanas blanco oficina Panduit', porNodo:0.25}
+};
+PARTES.cordon = {
+  'Cat 6A|3ft':{clave:'UTP28X3BU', desc:'Cordón parcheo Cat6A 3ft azul Panduit'},
+  'Cat 6A|5ft':{clave:'UTP28X5BU', desc:'Cordón parcheo Cat6A 5ft azul Panduit'},
+  'Cat 6A|7ft':{clave:'UTP28X7BU', desc:'Cordón parcheo Cat6A 7ft azul Panduit'},
+  'Cat 6|3ft':{clave:'UTP28SP3BU', desc:'Cordón parcheo Cat6 3ft azul Panduit'},
+  'Cat 6|5ft':{clave:'UTP28SP5BU', desc:'Cordón parcheo Cat6 5ft azul Panduit'},
+  'Cat 6|7ft':{clave:'UTP28SP7BU', desc:'Cordón parcheo Cat6 7ft azul Panduit'}
+};
+PARTES.rack = {
+  panel24:{clave:'CPP24WBLY', desc:'Panel modular vacío 24 puertos Panduit'},
+  orgH:{clave:'WMPF1E', desc:'Organizador horizontal sencillo 2UR Panduit'},
+  orgV:{clave:'WMPV45E', desc:'Organizador vertical 45UR Panduit'}
+};
+PARTES.lotem = {clave:'LOTEM', desc:'Lote de materiales misceláneos para la instalación de canalización'};
+
+// Mapea la categoría del cable a la familia de jack / cordón.
+function jackCatDe(cat){ cat = cat||''; if(cat.indexOf('6A')>-1) return 'Cat 6A'; if(cat.indexOf('5e')>-1) return 'Cat 5e'; return 'Cat 6'; }
+function cordCatDe(cat){ return (cat||'').indexOf('6A')>-1 ? 'Cat 6A' : 'Cat 6'; }
+function placaRec(tipo, cat){
+  if(tipo==='2 ventanas' && (cat||'').indexOf('6A')>-1) return PARTES.placa['2 ventanas angular'];
+  return PARTES.placa[tipo] || PARTES.placa['2 ventanas'];
+}
+
 function ceilNum(n){ return Math.max(0, Math.ceil(n - 1e-9)); }
 function odooProducto(rec){ return '['+rec.clave+'] '+rec.desc; }
 
 // Construye las líneas de cotización para Odoo a partir del levantamiento.
-function buildOdooCotizacion(manoObra){
+// moMap / lotemMap: {claveServicio: monto} (mano de obra y LOTEM por solución).
+function buildOdooCotizacion(moMap, lotemMap){
+  moMap = moMap || {}; lotemMap = lotemMap || {};
   var lines = [], faltantes = [];
-  function push(rec, cantidad, precio){ if(cantidad>0) lines.push({producto:odooProducto(rec), cantidad:cantidad, precio:(precio!=null?precio:'')}); }
+  function push(rec, cantidad, precio){ if(rec && cantidad>0) lines.push({producto:odooProducto(rec), cantidad:cantidad, precio:(precio!=null?precio:'')}); }
 
   current.services.forEach(function(key){
     var conf = SERVICES[key]; if(!conf) return;
@@ -1608,11 +1651,22 @@ function buildOdooCotizacion(manoObra){
     var items = (d.repeatable && d.repeatable[rep.key]) || [];
     if(!items.length) return;
     var bom = rep.bom || {};
+    var isData = key==='nodos';
+
+    // Categoría de cable representativa del servicio (para elegir accesorios).
+    var svcCat = '';
+    if(bom.cableField){
+      svcCat = isData ? (d.fields.cable_categoria||'') : (function(){
+        for(var i=0;i<items.length;i++){ var c=itemFieldValue(repFieldDef(rep,bom.cableField), items[i], key); if(c) return c; }
+        return '';
+      })();
+    }
 
     // Cable de red (cobre)
     if(bom.cableField){
       var marca = d.fields.cable_marca || 'Panduit';
       if(marca==='Otro') marca = d.fields.cable_marca_otro || 'Panduit';
+      var color = d.fields.cable_color || 'Azul';
       var cg = {};
       items.forEach(function(it){
         var cat = itemFieldValue(repFieldDef(rep, bom.cableField), it, key);
@@ -1620,7 +1674,7 @@ function buildOdooCotizacion(manoObra){
         cg[cat] = (cg[cat]||0) + numVal(it.distancia);
       });
       Object.keys(cg).forEach(function(cat){
-        var rec = PARTES.cable[cat+'|'+marca];
+        var rec = PARTES.cable[cat+'|'+marca+'|'+color] || PARTES.cable[cat+'|'+marca];
         if(rec) push(rec, ceilNum(cg[cat]));
         else faltantes.push('Cable '+cat+' · '+marca);
       });
@@ -1666,16 +1720,47 @@ function buildOdooCotizacion(manoObra){
       Object.keys(fc).forEach(function(st){ var rec = PARTES.fibraCable[st]; if(rec) push(rec, ceilNum(fc[st])); else faltantes.push('Fibra '+st); });
       Object.keys(cn).forEach(function(t){ var rec = PARTES.fibraConector[t]; if(rec) push(rec, ceilNum(cn[t])); else faltantes.push('Conector fibra '+t); });
     }
-  });
 
-  var mo = numVal(manoObra);
-  if(mo>0) lines.push({producto:'Mano de Obra', cantidad:1, precio:mo});
+    // === Accesorios de conectividad (receta por punto) ===
+    var puntos = items.length;
+    if(bom.cableField && puntos>0){
+      push(PARTES.jack[jackCatDe(svcCat)], puntos);
+      var cc = cordCatDe(svcCat);
+      if(isData){
+        var pl = placaRec(d.fields.placa_tipo||'2 ventanas', svcCat);
+        push(pl, ceilNum(puntos * (pl.porNodo||0.5)));
+        push(PARTES.cordon[cc+'|7ft'], puntos);                          // cordón usuario
+        var rlen = numVal(d.fields.rack_ur)>=42 ? '5ft' : '3ft';
+        push(PARTES.cordon[cc+'|'+rlen], puntos);                        // cordón rack
+        var panels = ceilNum(puntos/24);
+        push(PARTES.rack.panel24, panels);
+        push(PARTES.rack.orgH, panels);
+        push(PARTES.rack.orgV, 2);
+      } else {
+        push(PARTES.fpTerm, puntos);                                     // terminación en campo
+        push(PARTES.cordon[cc+'|3ft'], puntos);                          // cordón cámara/AP/acceso
+      }
+    }
+
+    // LOTEM por solución (monto manual, sale de la Calculadora)
+    var lot = numVal(lotemMap[key]);
+    if(lot>0) lines.push({producto:odooProducto(PARTES.lotem), cantidad:1, precio:lot});
+
+    // Mano de Obra por solución (monto manual)
+    var moMonto = numVal(moMap[key]);
+    if(moMonto>0) lines.push({producto:'Mano de Obra', cantidad:1, precio:moMonto});
+  });
 
   return {lines:lines, faltantes:faltantes};
 }
 
-function downloadOdooCotizacion(manoObra){
-  var res = buildOdooCotizacion(manoObra);
+function downloadOdooCotizacion(){
+  var moMap = {}, lotemMap = {};
+  current.services.forEach(function(key){
+    var mo = document.getElementById('mo-'+key); if(mo) moMap[key] = mo.value;
+    var lt = document.getElementById('lotem-'+key); if(lt) lotemMap[key] = lt.value;
+  });
+  var res = buildOdooCotizacion(moMap, lotemMap);
   if(!res.lines.length){ showToast('No hay materiales con clave para exportar.', true); return; }
   var cols = ['Referencia de la orden','Cliente','Vendedor','Actividades','Referencia del cliente','Líneas de la orden/Producto','Líneas de la orden/Cantidad','Líneas de la orden/Precio unitario'];
   function esc(v){ v = (v==null?'':String(v)); return /[",\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
@@ -1995,10 +2080,23 @@ function renderSummary(){
     '<button class="btn ghost" id="btn-print">Imprimir / Guardar PDF</button>'+
     '<button class="btn ghost" id="btn-copy">Copiar resumen</button>'+
     '<button class="btn ghost" id="btn-csv">Descargar CSV</button>'+
-    '<input type="number" id="mo-monto" min="0" step="0.01" placeholder="Mano de obra $ (opcional)" '+
-      'style="max-width:190px;padding:9px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:inherit;"/>'+
-    '<button class="btn" id="btn-odoo">Cotización Odoo (CSV)</button>'+
   '</div>';
+
+  // Caja de exportación a Odoo: mano de obra y LOTEM por solución.
+  var svcMat = current.services.filter(function(k){ return SERVICES[k] && SERVICES[k].repeatable; });
+  if(svcMat.length){
+    var inpStyle = 'width:120px;padding:8px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:inherit;';
+    html += '<div class="odoo-box noprint">'+
+      '<div class="odoo-title">Cotización para Odoo</div>'+
+      '<p class="summary-empty-note" style="margin:0 0 10px;">Genera los materiales + accesorios con sus claves SysCom, por solución. Captura la mano de obra (de Costos) y el LOTEM (de la Calculadora) de cada una.</p>'+
+      svcMat.map(function(key){
+        return '<div class="odoo-row"><span class="odoo-sol">'+escapeHtml(SERVICES[key].label)+'</span>'+
+          '<label>Mano de obra $ <input type="number" min="0" step="0.01" id="mo-'+key+'" style="'+inpStyle+'"/></label>'+
+          '<label>LOTEM $ <input type="number" min="0" step="0.01" id="lotem-'+key+'" style="'+inpStyle+'"/></label></div>';
+      }).join('')+
+      '<button class="btn" id="btn-odoo" style="margin-top:10px;">Descargar cotización Odoo (CSV)</button>'+
+    '</div>';
+  }
 
   var folio = surveyFolio(current);
   var subParts = ['Folio: '+folio];
@@ -2052,10 +2150,8 @@ function renderSummary(){
     } else { fallbackCopy(); }
   };
   document.getElementById('btn-csv').onclick = downloadCSV;
-  document.getElementById('btn-odoo').onclick = function(){
-    var mo = document.getElementById('mo-monto');
-    downloadOdooCotizacion(mo ? mo.value : '');
-  };
+  var btnOdoo = document.getElementById('btn-odoo');
+  if(btnOdoo) btnOdoo.onclick = function(){ downloadOdooCotizacion(); };
 }
 
 function goSummary(id){
