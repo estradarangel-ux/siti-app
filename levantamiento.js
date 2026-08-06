@@ -1372,9 +1372,8 @@ function goEdit(id){
     current._isNew = false;
     if(!current.data) current.data = {};
     if(!current.services) current.services = [];
+    // Al editar, todas las secciones inician minimizadas (el usuario abre la que necesita).
     openAccordions = {};
-    current.services.forEach(function(k){ openAccordions[k]=false; });
-    if(current.services.length) openAccordions[current.services[0]] = true;
     view='form'; renderForm();
   });
 }
